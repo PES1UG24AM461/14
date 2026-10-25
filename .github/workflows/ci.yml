@@ -1,0 +1,50 @@
+name: CI
+
+# Runs on every push and on every pull request into main (SRS FR-028, FR-029).
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format check (Prettier)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+
+  test:
+    name: Lint, test and build (${{ matrix.workspace }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        workspace: [client, server]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint (ESLint)
+        run: npm run lint -w ${{ matrix.workspace }}
+      - name: Unit and integration tests (Vitest)
+        run: npm test -w ${{ matrix.workspace }}
+      - name: Production build
+        if: matrix.workspace == 'client'
+        run: npm run build -w client
