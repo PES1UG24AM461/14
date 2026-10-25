@@ -20,12 +20,12 @@ Faculty guide: Arpitha K · Software Engineering, Section H
 
 ## Project documents
 
-| Document                            | File                                                                                                                     |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Software Requirements Specification | [Project-Deliverables/Online_Quiz_System_SRS_Revised.docx](Project-Deliverables/Online_Quiz_System_SRS_Revised.docx)     |
-| Software Architecture and Design    | [Project-Deliverables/Online_Quiz_System_SAD_Revised.docx](Project-Deliverables/Online_Quiz_System_SAD_Revised.docx)     |
-| Software Test Plan                  | [Project-Deliverables/Online_Quiz_System_STP_Revised-2.docx](Project-Deliverables/Online_Quiz_System_STP_Revised-2.docx) |
-| Product backlog and sprint plan     | [docs/SPRINT_PLAN.md](docs/SPRINT_PLAN.md)                                                                               |
+| Document                            | File                                                                                                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Software Requirements Specification | [Project-Deliverables/Online_Quiz_System_SRS_Revised.docx](Project-Deliverables/Online_Quiz_System_SRS_Revised.docx) ([PDF](Project-Deliverables/Online_Quiz_System_SRS_Revised.pdf))       |
+| Software Architecture and Design    | [Project-Deliverables/Online_Quiz_System_SAD_Revised.docx](Project-Deliverables/Online_Quiz_System_SAD_Revised.docx) ([PDF](Project-Deliverables/Online_Quiz_System_SAD_Revised.pdf))       |
+| Software Test Plan                  | [Project-Deliverables/Online_Quiz_System_STP_Revised-2.docx](Project-Deliverables/Online_Quiz_System_STP_Revised-2.docx) ([PDF](Project-Deliverables/Online_Quiz_System_STP_Revised-2.pdf)) |
+| Product backlog and sprint plan     | [docs/SPRINT_PLAN.md](docs/SPRINT_PLAN.md)                                                                                                                                                  |
 
 The backlog is tracked as GitHub issues in this repository and in the linked GitHub Project (story points, sprint, priority, assignee).
 
