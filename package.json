@@ -1,0 +1,24 @@
+{
+  "name": "online-quiz-system",
+  "private": true,
+  "description": "Online Quiz System - Software Engineering mini-project (PES University, Section H)",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev:client": "npm run dev -w client",
+    "dev:server": "npm run dev -w server",
+    "lint": "npm run lint --workspaces",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm test --workspaces",
+    "build": "npm run build -w client"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
