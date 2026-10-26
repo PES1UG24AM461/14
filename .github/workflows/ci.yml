@@ -1,8 +1,8 @@
 name: CI
 
-# Runs on every push and on every pull request into main (SRS FR-028, FR-029).
 on:
   push:
+    branches: [main]
   pull_request:
     branches: [main]
 
@@ -19,32 +19,63 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run format:check
 
-  test:
-    name: Lint, test and build (${{ matrix.workspace }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        workspace: [client, server]
-    steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - name: Install dependencies
         run: npm ci
-      - name: Lint (ESLint)
-        run: npm run lint -w ${{ matrix.workspace }}
-      - name: Unit and integration tests (Vitest)
-        run: npm test -w ${{ matrix.workspace }}
-      - name: Production build
-        if: matrix.workspace == 'client'
+
+      - name: Check formatting
+        run: npm run format:check
+
+  client:
+    name: Lint, test and build (client)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint -w client
+
+      - name: Test
+        run: npm test -w client
+
+      - name: Build
         run: npm run build -w client
+
+  server:
+    name: Lint, test and build (server)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint -w server
+
+      - name: Test
+        run: npm test -w server
+
+      - name: Check server syntax
+        run: node --check server/src/server.js
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
