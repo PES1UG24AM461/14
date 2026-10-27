@@ -12,6 +12,6 @@ router.use('/health', healthRouter);
 router.use('/auth', authRouter);
 router.use('/roles', rolesRouter);
 router.use('/quizzes', quizzesRouter);
-router.use('/quizzes', attemptsRouter);
-router.use('/quizzes', quizAuthoringRouter);
+router.use(attemptsRouter);
+router.use(quizAuthoringRouter);
 export default router;
