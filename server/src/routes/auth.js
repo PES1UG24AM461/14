@@ -73,17 +73,11 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body ?? {};
 
-    if (
-      typeof email !== 'string' ||
-      typeof password !== 'string' ||
-      !email.trim() ||
-      !password
-    ) {
+    if (typeof email !== 'string' || typeof password !== 'string' || !email.trim() || !password) {
       return res.status(400).json({
         error: 'Email and password are required',
       });
@@ -102,9 +96,7 @@ router.post('/login', async (req, res, next) => {
     }).select('+passwordHash');
 
     // Use the same response for unknown emails and incorrect passwords.
-    const passwordMatches = user
-      ? await bcrypt.compare(password, user.passwordHash)
-      : false;
+    const passwordMatches = user ? await bcrypt.compare(password, user.passwordHash) : false;
 
     if (!user || !passwordMatches) {
       return res.status(401).json({
@@ -137,7 +129,6 @@ router.post('/login', async (req, res, next) => {
     return next(error);
   }
 });
-
 
 router.post('/logout', authenticate, async (req, res, next) => {
   try {
