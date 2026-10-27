@@ -1,4 +1,3 @@
-
 import { describe, it, expect, vi } from 'vitest';
 import { authorize } from '../src/middleware/authorize.js';
 
@@ -47,9 +46,7 @@ describe('authorize middleware', () => {
   });
 
   it('rejects an invalid allowed role', () => {
-    expect(() => authorize('superuser')).toThrow(
-      'Invalid or missing allowed roles'
-    );
+    expect(() => authorize('superuser')).toThrow('Invalid or missing allowed roles');
   });
 
   it('rejects an empty list of allowed roles', () => {

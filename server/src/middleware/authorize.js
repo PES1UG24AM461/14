@@ -1,11 +1,7 @@
-
 const VALID_ROLES = ['student', 'faculty', 'administrator'];
 
 export function authorize(...allowedRoles) {
-  if (
-    allowedRoles.length === 0 ||
-    allowedRoles.some((role) => !VALID_ROLES.includes(role))
-  ) {
+  if (allowedRoles.length === 0 || allowedRoles.some((role) => !VALID_ROLES.includes(role))) {
     throw new Error('Invalid or missing allowed roles');
   }
 
