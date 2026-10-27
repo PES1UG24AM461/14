@@ -3,6 +3,7 @@ import Home from './pages/Home.jsx';
 import QuizDetail from './pages/QuizDetail.jsx';
 import QuizTopics from './pages/QuizTopics.jsx';
 import Register from './pages/Register.jsx';
+import TakeQuiz from './pages/TakeQuiz.jsx';
 import NotFound from './pages/NotFound.jsx';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/quizzes" element={<QuizTopics />} />
       <Route path="/quizzes/:quizId" element={<QuizDetail />} />
+      <Route path="/quizzes/:quizId/take" element={<TakeQuiz />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
