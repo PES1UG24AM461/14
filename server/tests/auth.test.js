@@ -89,3 +89,82 @@ describe('OQS-04: Student registration', () => {
     expect(savedUser.role).toBe('student');
   });
 });
+
+describe('OQS-05: Login, session and logout', () => {
+  async function registerStudent() {
+    await request(app).post('/api/auth/register').send({
+      name: 'Test Student',
+      email: 'student@example.com',
+      password: 'SecurePass123',
+    });
+  }
+
+  it('STP-OQS05-01: logs in and returns a JWT with safe user details', async () => {
+    await registerStudent();
+
+    const response = await request(app).post('/api/auth/login').send({
+      email: 'STUDENT@example.com',
+      password: 'SecurePass123',
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.token).toBeTruthy();
+    expect(response.body.user.email).toBe('student@example.com');
+    expect(response.body.user.role).toBe('student');
+    expect(response.body.user.passwordHash).toBeUndefined();
+  });
+
+  it('STP-OQS05-02: rejects an incorrect password', async () => {
+    await registerStudent();
+
+    const response = await request(app).post('/api/auth/login').send({
+      email: 'student@example.com',
+      password: 'WrongPassword123',
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('Invalid email or password');
+  });
+
+  it('STP-OQS05-03: rejects an unknown email', async () => {
+    const response = await request(app).post('/api/auth/login').send({
+      email: 'unknown@example.com',
+      password: 'SecurePass123',
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe('Invalid email or password');
+  });
+
+  it('STP-OQS05-04: rejects logout without authentication', async () => {
+    const response = await request(app).post('/api/auth/logout');
+
+    expect(response.status).toBe(401);
+  });
+
+  it('STP-OQS05-05: invalidates the token after logout', async () => {
+    await registerStudent();
+
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'student@example.com',
+      password: 'SecurePass123',
+    });
+
+    expect(loginResponse.status).toBe(200);
+
+    const token = loginResponse.body.token;
+
+    const logoutResponse = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(logoutResponse.status).toBe(200);
+
+    // The same token must no longer authorize another logout.
+    const secondLogoutResponse = await request(app)
+      .post('/api/auth/logout')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(secondLogoutResponse.status).toBe(401);
+  });
+});
