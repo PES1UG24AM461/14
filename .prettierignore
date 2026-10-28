@@ -1,6 +1,7 @@
 node_modules
 dist
 coverage
+reports
 package-lock.json
 Project-Deliverables
 docs/sprint-videos
