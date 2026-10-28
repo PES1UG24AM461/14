@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import api from '../api/client.js';
-import { formatClock, remainingMs } from '../utils/countdown.js';
+import { createServerClock, formatClock, remainingMs } from '../utils/countdown.js';
 
 const START_ERRORS = {
   401: 'Please log in as a student to take this quiz.',
@@ -21,6 +21,7 @@ export default function TakeQuiz() {
   const [error, setError] = useState('');
   const [saveState, setSaveState] = useState('');
   const [timeLeft, setTimeLeft] = useState(null);
+  const serverNow = useRef(Date.now);
 
   useEffect(() => {
     let active = true;
@@ -28,6 +29,7 @@ export default function TakeQuiz() {
       .post(`/quizzes/${quizId}/attempts`)
       .then((res) => {
         if (!active) return;
+        serverNow.current = createServerClock(res.data.serverTime);
         setAttempt(res.data.attempt);
         setQuestions(res.data.questions);
         setAnswers(
@@ -45,7 +47,7 @@ export default function TakeQuiz() {
   // The countdown is only a display; the server deadline is what decides (NFR-003).
   useEffect(() => {
     if (!attempt) return undefined;
-    const tick = () => setTimeLeft(remainingMs(attempt.deadlineAt));
+    const tick = () => setTimeLeft(remainingMs(attempt.deadlineAt, serverNow.current()));
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
@@ -96,7 +98,11 @@ export default function TakeQuiz() {
       <p>
         Question {current + 1} of {questions.length} · {answeredCount} answered
       </p>
-      {timeUp && <p role="alert">Time is up. Your saved answers will be submitted.</p>}
+      {timeUp && (
+        <p role="alert">
+          Time is up. The answers you saved before the deadline have been submitted.
+        </p>
+      )}
 
       {question && (
         <fieldset disabled={timeUp}>
