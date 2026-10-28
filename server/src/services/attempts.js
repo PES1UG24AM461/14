@@ -37,6 +37,59 @@ async function studentQuestions(quizId) {
   return questions.map((q) => ({ id: String(q._id), prompt: q.prompt, options: q.options }));
 }
 
+// FR-019: the score is the number of stored answers that match the server-side answer key.
+async function scoreAnswers(quizId, answers) {
+  const keys = await Question.find({ quizId }).select('+correctOption').lean();
+  const correct = new Map(keys.map((q) => [String(q._id), q.correctOption]));
+  return answers.filter((a) => correct.get(String(a.questionId)) === a.selectedOption).length;
+}
+
+/**
+ * FR-017 / NFR-002: finalize an attempt exactly once and store its score.
+ * Only answers already saved are scored, so nothing sent after the deadline can count.
+ * An attempt finalized after its deadline is recorded as submitted at the deadline.
+ * Returns the finalized attempt; if another request finalized it first, that stored result is returned.
+ */
+export async function finalizeAttempt(attempt, now = new Date()) {
+  let current = attempt;
+  while (current.status === 'in_progress') {
+    const score = await scoreAnswers(current.quizId, current.answers);
+    const updated = await Attempt.findOneAndUpdate(
+      // updatedAt guards against an answer saved between scoring and this update.
+      { _id: current._id, status: 'in_progress', updatedAt: current.updatedAt },
+      {
+        $set: {
+          status: 'finalized',
+          score,
+          submittedAt: now < current.deadlineAt ? now : current.deadlineAt,
+        },
+      },
+      { new: true }
+    );
+    if (updated) return updated;
+    current = await Attempt.findById(current._id);
+  }
+  return current;
+}
+
+// NFR-003: an attempt past its server deadline is finalized the first time it is touched.
+async function finalizeIfExpired(attempt, now) {
+  if (attempt.status === 'in_progress' && now >= attempt.deadlineAt) {
+    return finalizeAttempt(attempt, now);
+  }
+  return attempt;
+}
+
+/**
+ * FR-017: finalize every in-progress attempt whose deadline has passed, including ones the
+ * student never came back to. server.js runs this every minute. Returns how many were finalized.
+ */
+export async function finalizeExpiredAttempts(now = new Date()) {
+  const expired = await Attempt.find({ status: 'in_progress', deadlineAt: { $lte: now } });
+  for (const attempt of expired) await finalizeAttempt(attempt, now);
+  return expired.length;
+}
+
 /**
  * FR-013: one attempt record per student per quiz.
  * Creates the attempt with a server-side deadline, or resumes the student's active attempt.
@@ -74,10 +127,17 @@ export async function startOrResumeAttempt(userId, quizId, now = new Date()) {
     attempt = await Attempt.findOne({ userId, quizId });
   }
 
+  attempt = await finalizeIfExpired(attempt, now);
   if (attempt.status === 'finalized') {
     throw httpError(409, 'You have already completed this quiz');
   }
-  return { created, attempt: toAttemptView(attempt), questions: await studentQuestions(quizId) };
+  // serverTime lets the countdown follow the server clock rather than the browser clock (NFR-003).
+  return {
+    created,
+    attempt: toAttemptView(attempt),
+    questions: await studentQuestions(quizId),
+    serverTime: now,
+  };
 }
 
 /**
@@ -92,7 +152,11 @@ export async function saveAnswers(userId, attemptId, answers, now = new Date()) 
   if (String(attempt.userId) !== String(userId)) throw httpError(403, 'Not your attempt');
   if (attempt.status !== 'in_progress')
     throw httpError(409, 'This attempt has already been submitted');
-  if (now >= attempt.deadlineAt) throw httpError(409, 'Time is up for this attempt');
+  if (now >= attempt.deadlineAt) {
+    // FR-017 / FR-018: finalize with the answers saved by the deadline and reject this late update.
+    await finalizeAttempt(attempt, now);
+    throw httpError(409, 'Time is up for this attempt');
+  }
 
   if (!Array.isArray(answers) || answers.length === 0) {
     throw httpError(422, 'answers must be a non-empty list');
