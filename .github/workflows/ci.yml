@@ -48,11 +48,28 @@ jobs:
       - name: Lint
         run: npm run lint -w client
 
-      - name: Test
-        run: npm test -w client
+      # OQS-20: tests with an 80% statement coverage gate (NFR-007, FR-031)
+      - name: Test with coverage
+        run: npm run test:ci -w client
 
       - name: Build
         run: npm run build -w client
+
+      - name: Lint report
+        if: always()
+        run: npx eslint . --format json --output-file reports/eslint.json || true
+        working-directory: client
+
+      # FR-030: test, coverage and lint reports as downloadable artifacts
+      - name: Upload client reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-reports
+          path: |
+            client/reports/
+            client/coverage/
+          retention-days: 14
 
   server:
     name: Lint, test and build (server)
@@ -71,11 +88,32 @@ jobs:
       - name: Lint
         run: npm run lint -w server
 
-      - name: Test
-        run: npm test -w server
+      # OQS-20: tests with an 80% statement coverage gate (NFR-007, FR-031)
+      - name: Test with coverage
+        run: npm run test:ci -w server
 
       - name: Check server syntax
         run: node --check server/src/server.js
 
+      # SEC-006: high or critical advisories fail the run; the full report is kept as an artifact.
       - name: Dependency audit
-        run: npm audit --audit-level=high
+        run: |
+          mkdir -p server/reports
+          npm audit --json > server/reports/npm-audit.json || true
+          npm audit --audit-level=high
+
+      - name: Lint report
+        if: always()
+        run: npx eslint . --format json --output-file reports/eslint.json || true
+        working-directory: server
+
+      # FR-030: test, coverage, lint and audit reports as downloadable artifacts
+      - name: Upload server reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-reports
+          path: |
+            server/reports/
+            server/coverage/
+          retention-days: 14
