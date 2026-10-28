@@ -69,10 +69,15 @@ Never commit `.env`; only `.env.example` (placeholders) is tracked.
 npm run lint          # ESLint (client and server)
 npm run format:check  # Prettier ("npm run format" fixes formatting)
 npm test              # Vitest (client and server)
+npm run test:coverage -w client   # client tests with the 80% statement coverage gate
+npm run test:coverage -w server   # server tests with the 80% statement coverage gate
 npm run build         # production build of the client
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) runs these on every push and pull request.
+GitHub Actions (`.github/workflows/ci.yml`) runs these on every pull request and every push to `main`, along with
+`npm audit --audit-level=high`. CI fails if statement coverage drops below 80% for the client or the server.
+Each run uploads `client-reports` and `server-reports` artifacts (JUnit test results, HTML/LCOV coverage, ESLint
+report and, for the server, the npm audit report); open the run on the Actions tab and scroll to **Artifacts**.
 
 ## Project structure
 
