@@ -190,3 +190,51 @@ export async function saveAnswers(userId, attemptId, answers, now = new Date()) 
   if (!updated) throw httpError(409, 'This attempt can no longer be changed');
   return toAttemptView(updated);
 }
+export async function submitAttempt(userId, attemptId, now = new Date()) {
+  requireObjectId(attemptId, 'attempt');
+
+  let attempt = await Attempt.findById(attemptId);
+
+  if (!attempt) {
+    throw httpError(404, 'Attempt not found');
+  }
+
+  if (String(attempt.userId) !== String(userId)) {
+    throw httpError(403, 'Not your attempt');
+  }
+
+  if (attempt.status === 'finalized') {
+    return attempt;
+  }
+
+  if (now >= attempt.deadlineAt) {
+    return finalizeAttempt(attempt, now);
+  }
+
+  return finalizeAttempt(attempt, now);
+}
+export async function getAttemptResult(userId, attemptId) {
+  requireObjectId(attemptId, 'attempt');
+
+  const attempt = await Attempt.findById(attemptId);
+
+  if (!attempt) {
+    throw httpError(404, 'Attempt not found');
+  }
+
+  if (String(attempt.userId) !== String(userId)) {
+    throw httpError(403, 'Not your attempt');
+  }
+
+  if (attempt.status !== 'finalized') {
+    throw httpError(409, 'This attempt has not been submitted yet');
+  }
+
+  return {
+    attemptId: String(attempt._id),
+    quizId: String(attempt.quizId),
+    status: attempt.status,
+    score: attempt.score,
+    submittedAt: attempt.submittedAt,
+  };
+}
