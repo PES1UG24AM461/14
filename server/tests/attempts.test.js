@@ -272,7 +272,7 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
   afterEach(clearTestDB);
   afterAll(closeTestDB);
 
-  it('TC-ATT-17 retrieves a submitted result only for its owner', async () => {
+  it('TC-SCR-03 shows a submitted result only to its owner', async () => {
     const { quiz, questions } = await seedQuiz();
     const started = await start(quiz._id);
 
@@ -291,7 +291,7 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
     expect(otherStudent.status).toBe(403);
   });
 
-  it('TC-ATT-15 submits an attempt and calculates the score on the server', async () => {
+  it('TC-ATT-06 submits an attempt and calculates the score on the server', async () => {
     const { quiz, questions } = await seedQuiz();
     const started = await start(quiz._id);
 
@@ -306,6 +306,7 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
     expect(res.status).toBe(200);
     expect(res.body.result.status).toBe('finalized');
     expect(res.body.result.score).toBe(2);
+    expect(res.body.result.questionCount).toBe(3);
 
     const stored = await Attempt.findById(started.body.attempt.id);
 
@@ -314,7 +315,7 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
     expect(stored.submittedAt).toBeTruthy();
   });
 
-  it('TC-ATT-16 returns the stored result when the attempt is submitted twice', async () => {
+  it('TC-ATT-07 returns the stored result when the attempt is submitted twice', async () => {
     const { quiz, questions } = await seedQuiz();
     const started = await start(quiz._id);
 
@@ -354,5 +355,77 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
 
     expect(unauthenticated.status).toBe(401);
     expect(faculty.status).toBe(403);
+  });
+
+  it('TC-SCR-01 scores all-correct, all-wrong and unanswered attempts from the stored key', async () => {
+    const { quiz, questions } = await seedQuiz();
+    const allCorrect = await start(quiz._id, studentA);
+    const allWrong = await start(quiz._id, studentB);
+    const ids = questions.map((q) => String(q._id));
+
+    await save(
+      allCorrect.body.attempt.id,
+      ids.map((questionId, n) => ({ questionId, selectedOption: n }))
+    );
+    await save(
+      allWrong.body.attempt.id,
+      ids.map((questionId, n) => ({ questionId, selectedOption: (n + 1) % 4 })),
+      studentB
+    );
+
+    expect((await submit(allCorrect.body.attempt.id)).body.result.score).toBe(3);
+    expect((await submit(allWrong.body.attempt.id, studentB)).body.result.score).toBe(0);
+
+    const { quiz: other } = await seedQuiz();
+    const unanswered = await start(other._id);
+    expect((await submit(unanswered.body.attempt.id)).body.result.score).toBe(0);
+  });
+
+  it('TC-ATT-07 concurrent submissions store one final result', async () => {
+    const { quiz, questions } = await seedQuiz();
+    const started = await start(quiz._id);
+    await save(started.body.attempt.id, [
+      { questionId: String(questions[0]._id), selectedOption: 0 },
+    ]);
+
+    const results = await Promise.all([1, 2, 3].map(() => submit(started.body.attempt.id)));
+
+    expect(results.map((r) => r.status)).toEqual([200, 200, 200]);
+    expect(new Set(results.map((r) => r.body.result.submittedAt)).size).toBe(1);
+    expect(await Attempt.countDocuments({ quizId: quiz._id })).toBe(1);
+  });
+
+  it('TC-SEC-09 ignores a score or answer key sent by the client', async () => {
+    const { quiz, questions } = await seedQuiz();
+    const started = await start(quiz._id);
+    await save(started.body.attempt.id, [
+      { questionId: String(questions[0]._id), selectedOption: 3 },
+    ]);
+
+    const res = await request(app)
+      .post(`/api/attempts/${started.body.attempt.id}/submit`)
+      .set(as(studentA))
+      .send({ score: 100, answerKey: { [String(questions[0]._id)]: 3 } });
+
+    expect(res.body.result.score).toBe(0);
+    expect((await Attempt.findById(started.body.attempt.id)).score).toBe(0);
+  });
+
+  it('TC-SCR-04 never includes correct options or explanations in submit and result responses', async () => {
+    const { quiz } = await seedQuiz();
+    const started = await start(quiz._id);
+    const submitted = await submit(started.body.attempt.id);
+    const result = await getResult(started.body.attempt.id);
+
+    for (const body of [submitted.body, result.body]) {
+      expect(JSON.stringify(body)).not.toMatch(/correctOption|explanation|answerKey/);
+    }
+  });
+
+  it('rejects viewing the result of an attempt that is still in progress (409)', async () => {
+    const { quiz } = await seedQuiz();
+    const started = await start(quiz._id);
+
+    expect((await getResult(started.body.attempt.id)).status).toBe(409);
   });
 });

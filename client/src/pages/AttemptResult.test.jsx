@@ -25,7 +25,7 @@ describe('OQS-12: AttemptResult page', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Loading result...');
   });
 
-  it('TC-SCR-01 renders score, status, and formatted submission time on success', async () => {
+  it('TC-SCR-03 renders score, status, and formatted submission time on success', async () => {
     vi.spyOn(api, 'get').mockResolvedValue({
       data: {
         result: {

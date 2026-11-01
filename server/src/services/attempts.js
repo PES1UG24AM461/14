@@ -190,51 +190,41 @@ export async function saveAnswers(userId, attemptId, answers, now = new Date()) 
   if (!updated) throw httpError(409, 'This attempt can no longer be changed');
   return toAttemptView(updated);
 }
-export async function submitAttempt(userId, attemptId, now = new Date()) {
-  requireObjectId(attemptId, 'attempt');
 
-  let attempt = await Attempt.findById(attemptId);
-
-  if (!attempt) {
-    throw httpError(404, 'Attempt not found');
-  }
-
-  if (String(attempt.userId) !== String(userId)) {
-    throw httpError(403, 'Not your attempt');
-  }
-
-  if (attempt.status === 'finalized') {
-    return attempt;
-  }
-
-  if (now >= attempt.deadlineAt) {
-    return finalizeAttempt(attempt, now);
-  }
-
-  return finalizeAttempt(attempt, now);
-}
-export async function getAttemptResult(userId, attemptId) {
-  requireObjectId(attemptId, 'attempt');
-
-  const attempt = await Attempt.findById(attemptId);
-
-  if (!attempt) {
-    throw httpError(404, 'Attempt not found');
-  }
-
-  if (String(attempt.userId) !== String(userId)) {
-    throw httpError(403, 'Not your attempt');
-  }
-
-  if (attempt.status !== 'finalized') {
-    throw httpError(409, 'This attempt has not been submitted yet');
-  }
-
+// What the student sees after submitting: their score only, never the answer key (FR-020, SEC-003).
+async function toResultView(attempt) {
   return {
     attemptId: String(attempt._id),
     quizId: String(attempt.quizId),
     status: attempt.status,
     score: attempt.score,
+    questionCount: await Question.countDocuments({ quizId: attempt.quizId }),
     submittedAt: attempt.submittedAt,
   };
+}
+
+async function findOwnAttempt(userId, attemptId) {
+  requireObjectId(attemptId, 'attempt');
+  const attempt = await Attempt.findById(attemptId);
+  if (!attempt) throw httpError(404, 'Attempt not found');
+  if (String(attempt.userId) !== String(userId)) throw httpError(403, 'Not your attempt');
+  return attempt;
+}
+
+/**
+ * FR-016 / NFR-002: submit the student's attempt and return the score.
+ * Submitting again returns the stored result; after the deadline only answers saved in time count (FR-017).
+ */
+export async function submitAttempt(userId, attemptId, now = new Date()) {
+  const attempt = await findOwnAttempt(userId, attemptId);
+  return toResultView(await finalizeAttempt(attempt, now));
+}
+
+// FR-020: the result of a submitted attempt, for its owner only.
+export async function getAttemptResult(userId, attemptId) {
+  const attempt = await findOwnAttempt(userId, attemptId);
+  if (attempt.status !== 'finalized') {
+    throw httpError(409, 'This attempt has not been submitted yet');
+  }
+  return toResultView(attempt);
 }

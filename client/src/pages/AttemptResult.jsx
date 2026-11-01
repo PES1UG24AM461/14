@@ -51,7 +51,11 @@ export default function AttemptResult() {
     <main className="page">
       <h1>Quiz Result</h1>
       <p>
-        Score: <strong>{result.score}</strong>
+        Score:{' '}
+        <strong>
+          {result.score}
+          {result.questionCount !== undefined && ` / ${result.questionCount}`}
+        </strong>
       </p>
       <p>Status: {result.status}</p>
       <p>Submitted: {result.submittedAt ? new Date(result.submittedAt).toLocaleString() : '—'}</p>
