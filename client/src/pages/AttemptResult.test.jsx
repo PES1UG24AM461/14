@@ -107,4 +107,3 @@ describe('OQS-12: AttemptResult page', () => {
     resolvePromise({ data: { result: { score: 10, status: 'finalized' } } });
   });
 });
-
