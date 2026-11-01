@@ -31,6 +31,7 @@ function renderTakeQuiz() {
     <MemoryRouter initialEntries={['/quizzes/quiz1/take']}>
       <Routes>
         <Route path="/quizzes/:quizId/take" element={<TakeQuiz />} />
+        <Route path="/attempts/:attemptId/result" element={<div>Result Page</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -46,7 +47,7 @@ describe('OQS-11: Take Quiz page', () => {
 
     expect(await screen.findByText('What is 2 + 2?')).toBeInTheDocument();
     expect(screen.getByText(/Question 1 of 2/)).toBeInTheDocument();
-    expect(screen.getByText(/^(10:00|09:59)$/)).toBeInTheDocument();
+    expect(await screen.findByText(/^(10:00|09:59)$/)).toBeInTheDocument();
     expect(api.post).toHaveBeenCalledWith('/quizzes/quiz1/attempts');
 
     fireEvent.click(screen.getByLabelText('4'));
@@ -113,6 +114,128 @@ describe('OQS-11: Take Quiz page', () => {
 
     expect(await screen.findByText(/^0[45]:\d\d$/)).toBeInTheDocument();
     expect(screen.queryByText(/Time is up/)).not.toBeInTheDocument();
+  });
+
+  it('TC-ATT-06 submits the attempt upon confirmation and navigates to the result page', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      if (url === '/attempts/a1/submit') {
+        return Promise.resolve({
+          data: { result: { attemptId: 'a1', status: 'finalized', score: 2 } },
+        });
+      }
+      return Promise.reject(new Error(`Unhandled POST to ${url}`));
+    });
+
+    renderTakeQuiz();
+    expect(await screen.findByText('What is 2 + 2?')).toBeInTheDocument();
+
+    const submitBtn = screen.getByRole('button', { name: 'Submit Quiz' });
+    fireEvent.click(submitBtn);
+
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Are you sure you want to submit this quiz? You cannot change your answers after submission.'
+    );
+    expect(api.post).toHaveBeenCalledWith('/attempts/a1/submit');
+    expect(await screen.findByText('Result Page')).toBeInTheDocument();
+  });
+
+  it('cancels submission if confirmation dialog is declined', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    vi.spyOn(api, 'post').mockResolvedValue(startResponse());
+
+    renderTakeQuiz();
+    expect(await screen.findByText('What is 2 + 2?')).toBeInTheDocument();
+
+    const submitBtn = screen.getByRole('button', { name: 'Submit Quiz' });
+    fireEvent.click(submitBtn);
+
+    expect(window.confirm).toHaveBeenCalled();
+    expect(api.post).not.toHaveBeenCalledWith('/attempts/a1/submit');
+    expect(screen.queryByText('Result Page')).not.toBeInTheDocument();
+  });
+
+  it('handles submission errors (401, 403, 404, 409, and server unfinalized)', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    // 401
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.reject({ response: { status: 401 } });
+    });
+    renderTakeQuiz();
+    expect(await screen.findByText('What is 2 + 2?')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(
+      await screen.findByText('Please log in again before submitting your quiz.')
+    ).toBeInTheDocument();
+
+    // 403
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.reject({ response: { status: 403 } });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(
+      await screen.findByText('You are not allowed to submit this attempt.')
+    ).toBeInTheDocument();
+
+    // 404
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.reject({ response: { status: 404 } });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(await screen.findByText('This attempt could not be found.')).toBeInTheDocument();
+
+    // 409
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.reject({ response: { status: 409 } });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(
+      await screen.findByText(
+        'This attempt could not be submitted in its current state. Try opening the quiz again.'
+      )
+    ).toBeInTheDocument();
+
+    // unfinalized status
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.resolve({ data: { result: { status: 'in_progress' } } });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(
+      await screen.findByText('The server has not finalized this attempt.')
+    ).toBeInTheDocument();
+
+    // generic network error
+    vi.spyOn(api, 'post').mockImplementation((url) => {
+      if (url === '/quizzes/quiz1/attempts') return Promise.resolve(startResponse());
+      return Promise.reject(new Error('Network failure'));
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit Quiz' }));
+    expect(await screen.findByText('Network failure')).toBeInTheDocument();
+  });
+
+  it('handles answer saving errors', async () => {
+    vi.spyOn(api, 'post').mockResolvedValue(startResponse());
+    vi.spyOn(api, 'patch').mockRejectedValueOnce({ response: { status: 409 } });
+    renderTakeQuiz();
+
+    expect(await screen.findByText('What is 2 + 2?')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('4'));
+    expect(
+      await screen.findByText('Time is up - answers can no longer be changed.')
+    ).toBeInTheDocument();
+
+    vi.spyOn(api, 'patch').mockRejectedValueOnce(new Error('Network failure'));
+    fireEvent.click(screen.getByLabelText('3'));
+    expect(
+      await screen.findByText('Could not save your answer. Please try again.')
+    ).toBeInTheDocument();
   });
 });
 
