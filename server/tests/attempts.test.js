@@ -1,4 +1,3 @@
-
 import express from 'express';
 import mongoose from 'mongoose';
 import request from 'supertest';
@@ -64,10 +63,7 @@ const start = (quizId, user = studentA) =>
   request(app).post(`/api/quizzes/${quizId}/attempts`).set(as(user));
 
 const save = (attemptId, answers, user = studentA) =>
-  request(app)
-    .patch(`/api/attempts/${attemptId}/answers`)
-    .set(as(user))
-    .send({ answers });
+  request(app).patch(`/api/attempts/${attemptId}/answers`).set(as(user)).send({ answers });
 
 const submit = (attemptId, user = studentA) =>
   request(app).post(`/api/attempts/${attemptId}/submit`).set(as(user));
@@ -181,10 +177,7 @@ describe('OQS-11: start or resume an attempt and save answers', () => {
     const { quiz, questions } = await seedQuiz();
     const { body } = await start(quiz._id);
 
-    await Attempt.updateOne(
-      { _id: body.attempt.id },
-      { deadlineAt: new Date(Date.now() - 1000) }
-    );
+    await Attempt.updateOne({ _id: body.attempt.id }, { deadlineAt: new Date(Date.now() - 1000) });
 
     const res = await save(body.attempt.id, [
       { questionId: String(questions[0]._id), selectedOption: 1 },
@@ -212,16 +205,13 @@ describe('OQS-11: start or resume an attempt and save answers', () => {
     const { body } = await start(quiz._id);
     const other = new mongoose.Types.ObjectId().toString();
 
-    expect(
-      (await save(body.attempt.id, [{ questionId: other, selectedOption: 0 }])).status
-    ).toBe(422);
+    expect((await save(body.attempt.id, [{ questionId: other, selectedOption: 0 }])).status).toBe(
+      422
+    );
 
     expect(
-      (
-        await save(body.attempt.id, [
-          { questionId: String(questions[0]._id), selectedOption: 9 },
-        ])
-      ).status
+      (await save(body.attempt.id, [{ questionId: String(questions[0]._id), selectedOption: 9 }]))
+        .status
     ).toBe(422);
 
     expect((await save(body.attempt.id, 'not-a-list')).status).toBe(422);
@@ -267,9 +257,7 @@ describe('OQS-11: start or resume an attempt and save answers', () => {
 
     await request(realApp).post('/api/auth/logout').set(auth);
 
-    const afterLogout = await request(realApp)
-      .post(`/api/quizzes/${quiz._id}/attempts`)
-      .set(auth);
+    const afterLogout = await request(realApp).post(`/api/quizzes/${quiz._id}/attempts`).set(auth);
 
     expect(afterLogout.status).toBe(401);
   });

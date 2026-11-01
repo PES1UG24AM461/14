@@ -1,4 +1,3 @@
-
 import { Link, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../api/client.js';
@@ -55,11 +54,8 @@ export default function AttemptResult() {
         Score: <strong>{result.score}</strong>
       </p>
       <p>Status: {result.status}</p>
-      <p>
-        Submitted: {result.submittedAt ? new Date(result.submittedAt).toLocaleString() : '—'}
-      </p>
+      <p>Submitted: {result.submittedAt ? new Date(result.submittedAt).toLocaleString() : '—'}</p>
       <Link to="/quizzes">Back to quizzes</Link>
     </main>
   );
 }
-

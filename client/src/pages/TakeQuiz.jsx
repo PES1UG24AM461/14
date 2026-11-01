@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/client.js';
@@ -43,10 +42,7 @@ export default function TakeQuiz() {
         setQuestions(res.data.questions);
         setAnswers(
           Object.fromEntries(
-            res.data.attempt.answers.map((answer) => [
-              answer.questionId,
-              answer.selectedOption,
-            ])
+            res.data.attempt.answers.map((answer) => [answer.questionId, answer.selectedOption])
           )
         );
       })
@@ -137,9 +133,7 @@ export default function TakeQuiz() {
           'This attempt could not be submitted in its current state. Try opening the quiz again.'
         );
       } else {
-        setSubmitError(
-          err.message || 'Could not submit the quiz. Please try again.'
-        );
+        setSubmitError(err.message || 'Could not submit the quiz. Please try again.');
       }
     }
   }
@@ -163,19 +157,14 @@ export default function TakeQuiz() {
 
   const question = questions[current];
   const timeUp = timeLeft === 0;
-  const answeredCount = questions.filter(
-    (item) => answers[item.id] !== undefined
-  ).length;
+  const answeredCount = questions.filter((item) => answers[item.id] !== undefined).length;
 
   return (
     <main className="page">
       <h1>Take Quiz</h1>
 
       <p aria-live="polite">
-        Time left:{' '}
-        <strong>
-          {timeLeft === null ? '--:--' : formatClock(timeLeft)}
-        </strong>
+        Time left: <strong>{timeLeft === null ? '--:--' : formatClock(timeLeft)}</strong>
       </p>
 
       <p>
@@ -184,8 +173,8 @@ export default function TakeQuiz() {
 
       {timeUp && (
         <p role="alert">
-          Time is up. Submit the quiz to view your result. Only answers saved
-          before the deadline will be scored.
+          Time is up. Submit the quiz to view your result. Only answers saved before the deadline
+          will be scored.
         </p>
       )}
 
@@ -215,7 +204,6 @@ export default function TakeQuiz() {
         >
           Previous
         </button>{' '}
-
         <button
           type="button"
           onClick={() => setCurrent((index) => index + 1)}
@@ -229,11 +217,7 @@ export default function TakeQuiz() {
 
       {submitError && <p role="alert">{submitError}</p>}
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-      >
+      <button type="button" onClick={handleSubmit} disabled={isSubmitting}>
         {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
       </button>
     </main>

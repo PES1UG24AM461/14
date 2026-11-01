@@ -1,4 +1,3 @@
-
 import { Route, Routes } from 'react-router-dom';
 import AttemptResult from './pages/AttemptResult.jsx';
 import Home from './pages/Home.jsx';
