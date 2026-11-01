@@ -88,6 +88,10 @@ export default function Register() {
 
         {message && <p role="status">{message}</p>}
       </form>
+
+      <p>
+        Already have an account? <a href="/login">Log in</a>
+      </p>
     </main>
   );
 }
