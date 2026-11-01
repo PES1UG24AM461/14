@@ -219,3 +219,122 @@ describe('OQS-07: quiz authoring API', () => {
     expect((await request(realApp).post('/api/quizzes').send(validQuiz())).status).toBe(401);
   });
 });
+
+describe('OQS-08: publish and unpublish quizzes', () => {
+  const discovery = createApp();
+  const publish = (id, headers = asFacultyA) =>
+    request(app).post(`/api/quizzes/${id}/publish`).set(headers);
+  const unpublish = (id, headers = asFacultyA) =>
+    request(app).post(`/api/quizzes/${id}/unpublish`).set(headers);
+  const studentTitles = async () =>
+    (await request(discovery).get('/api/quizzes')).body.topics.flatMap((t) =>
+      t.quizzes.map((q) => q.title)
+    );
+
+  beforeAll(connectTestDB);
+  afterEach(clearTestDB);
+  afterAll(closeTestDB);
+
+  it('TC-QM-09 shows a quiz to students after publishing and hides it after unpublishing', async () => {
+    const { body } = await create();
+
+    const published = await publish(body.quiz.id);
+    expect(published.status).toBe(200);
+    expect(published.body.quiz.status).toBe('published');
+    expect(await studentTitles()).toEqual(['JavaScript Basics']);
+    expect((await request(discovery).get(`/api/quizzes/${body.quiz.id}`)).status).toBe(200);
+
+    const unpublished = await unpublish(body.quiz.id);
+    expect(unpublished.status).toBe(200);
+    expect(unpublished.body.quiz.status).toBe('draft');
+    expect(await studentTitles()).toEqual([]);
+  });
+
+  it('TC-QM-10 refuses to publish a quiz without questions or a duration (422) and keeps it a draft', async () => {
+    const { body } = await create({ ...validQuiz(), questions: [] });
+    const noQuestions = await publish(body.quiz.id);
+
+    expect(noQuestions.status).toBe(422);
+    expect(noQuestions.body.error).toMatch(/missing questions/);
+    expect((await Quiz.findById(body.quiz.id)).status).toBe('draft');
+
+    // A quiz stored without a duration (e.g. imported data) cannot be published either.
+    const { insertedId } = await Quiz.collection.insertOne({
+      title: 'Imported',
+      topic: 'Programming',
+      status: 'draft',
+      createdBy: new mongoose.Types.ObjectId(facultyA),
+    });
+    await Question.create({
+      quizId: insertedId,
+      prompt: 'Q',
+      options: ['a', 'b'],
+      correctOption: 0,
+    });
+    const noDuration = await publish(String(insertedId));
+
+    expect(noDuration.status).toBe(422);
+    expect(noDuration.body.error).toMatch(/missing duration/);
+    expect((await Quiz.findById(insertedId)).status).toBe('draft');
+  });
+
+  it('TC-NAV-02 never returns a draft to students, by list or by id', async () => {
+    const { body } = await create();
+
+    expect(await studentTitles()).toEqual([]);
+    expect((await request(discovery).get(`/api/quizzes/${body.quiz.id}`)).status).toBe(404);
+  });
+
+  it("TC-QM-07 stops a faculty member publishing or unpublishing another faculty member's quiz (403)", async () => {
+    const { body } = await create();
+    const asFacultyB = as(facultyB, 'faculty');
+
+    expect((await publish(body.quiz.id, asFacultyB)).status).toBe(403);
+    await publish(body.quiz.id);
+    expect((await unpublish(body.quiz.id, asFacultyB)).status).toBe(403);
+    expect((await Quiz.findById(body.quiz.id)).status).toBe('published');
+  });
+
+  it("lets an administrator publish and unpublish a faculty member's quiz", async () => {
+    const { body } = await create();
+
+    expect((await publish(body.quiz.id, as(admin, 'administrator'))).status).toBe(200);
+    expect((await unpublish(body.quiz.id, as(admin, 'administrator'))).status).toBe(200);
+  });
+
+  it('TC-AUTH-08 stops students publishing or unpublishing quizzes (403)', async () => {
+    const { body } = await create();
+
+    expect((await publish(body.quiz.id, as(student, 'student'))).status).toBe(403);
+    expect((await unpublish(body.quiz.id, as(student, 'student'))).status).toBe(403);
+    expect((await request(app).post(`/api/quizzes/${body.quiz.id}/publish`)).status).toBe(401);
+  });
+
+  it('allows editing again after unpublishing', async () => {
+    const { body } = await create();
+    await publish(body.quiz.id);
+
+    expect(
+      (
+        await request(app)
+          .patch(`/api/quizzes/${body.quiz.id}`)
+          .set(asFacultyA)
+          .send({ title: 'X' })
+      ).status
+    ).toBe(409);
+    await unpublish(body.quiz.id);
+    expect(
+      (
+        await request(app)
+          .patch(`/api/quizzes/${body.quiz.id}`)
+          .set(asFacultyA)
+          .send({ title: 'X' })
+      ).status
+    ).toBe(200);
+  });
+
+  it('TC-SEC-04 rejects invalid ids and unknown quizzes', async () => {
+    expect((await publish('not-an-id')).status).toBe(400);
+    expect((await unpublish(new mongoose.Types.ObjectId().toString())).status).toBe(404);
+  });
+});

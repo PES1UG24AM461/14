@@ -146,3 +146,37 @@ export async function deleteQuiz(user, quizId) {
   await Question.deleteMany({ quizId: quiz._id });
   await quiz.deleteOne();
 }
+
+// FR-012: a quiz can be published only when students could actually take it.
+async function missingForPublication(quiz) {
+  const missing = [];
+  if (!quiz.title) missing.push('title');
+  if (!quiz.topic) missing.push('topic');
+  if (!quiz.durationSeconds) missing.push('duration');
+  if ((await Question.countDocuments({ quizId: quiz._id })) === 0) missing.push('questions');
+  return missing;
+}
+
+// FR-011, FR-012: publish a complete quiz so it appears in student discovery.
+export async function publishQuiz(user, quizId) {
+  const quiz = await loadManageableQuiz(user, quizId);
+  const missing = await missingForPublication(quiz);
+  if (missing.length) {
+    throw httpError(422, `Cannot publish this quiz: missing ${missing.join(', ')}`);
+  }
+  quiz.status = 'published';
+  try {
+    await quiz.save();
+  } catch (err) {
+    throw asValidationError(err);
+  }
+  return toManagedQuiz(quiz);
+}
+
+// FR-011: unpublish a quiz; it disappears from student discovery and can be edited again.
+export async function unpublishQuiz(user, quizId) {
+  const quiz = await loadManageableQuiz(user, quizId);
+  quiz.status = 'draft';
+  await quiz.save({ validateBeforeSave: false });
+  return toManagedQuiz(quiz);
+}
