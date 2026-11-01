@@ -52,6 +52,7 @@ git clone https://github.com/PES1UG24AM461/14.git
 cd 14
 npm install                         # installs client and server (npm workspaces)
 cp server/.env.example server/.env  # then put your MONGODB_URI and a JWT_SECRET in server/.env
+npm run seed                        # seeds 1 admin, 2 faculty, and 5 students (safe & idempotent)
 ```
 
 Run the API and the web app in two terminals:

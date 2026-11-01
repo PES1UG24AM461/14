@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import api from './api/client.js';
 import App from './App.jsx';
 
 function renderAt(path) {
@@ -12,9 +13,29 @@ function renderAt(path) {
 }
 
 describe('Client scaffold (OQS-01)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.spyOn(api, 'get').mockResolvedValue({ data: { user: null, quizzes: [] } });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    localStorage.clear();
+  });
+
   it('renders the Home page at /', () => {
     renderAt('/');
     expect(screen.getByRole('heading', { name: 'Online Quiz System' })).toBeInTheDocument();
+  });
+
+  it('renders the Login page at /login', () => {
+    renderAt('/login');
+    expect(screen.getByRole('heading', { name: 'Log In' })).toBeInTheDocument();
+  });
+
+  it('renders the Quiz Management page at /manage/quizzes', () => {
+    renderAt('/manage/quizzes');
+    expect(screen.getByRole('heading', { name: 'Quiz Management' })).toBeInTheDocument();
   });
 
   it('renders a not-found page for unknown routes', () => {
