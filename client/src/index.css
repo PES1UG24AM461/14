@@ -77,3 +77,51 @@ fieldset.question {
   border-bottom: 1px solid #e5e7eb;
   padding: 12px 0;
 }
+
+/* Navigation and responsive layout (OQS-13, NFR-004: usable from 375 px without horizontal scrolling) */
+.site-header {
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.navbar {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.brand {
+  font-weight: bold;
+  text-decoration: none;
+  color: #1f2937;
+}
+
+img,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+textarea {
+  width: 100%;
+  max-width: 480px;
+  padding: 6px 8px;
+  font: inherit;
+}
+
+.page {
+  overflow-wrap: anywhere;
+}
