@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../api/client.js';
 import { createServerClock, formatClock, remainingMs } from '../utils/countdown.js';
@@ -57,19 +57,63 @@ export default function TakeQuiz() {
     };
   }, [quizId]);
 
-  // The countdown is a display; the server enforces the actual deadline.
+  // Finalizes the attempt on the server and opens the result page (FR-016).
+  const submitAttempt = useCallback(
+    async (attemptId) => {
+      if (submissionStarted.current) return;
+      submissionStarted.current = true;
+      setIsSubmitting(true);
+      setSubmitError('');
+
+      try {
+        const response = await api.post(`/attempts/${attemptId}/submit`);
+
+        if (response.data.result?.status !== 'finalized') {
+          throw new Error('The server has not finalized this attempt.');
+        }
+
+        navigate(`/attempts/${attemptId}/result`, { replace: true });
+      } catch (err) {
+        submissionStarted.current = false;
+        setIsSubmitting(false);
+
+        if (err.response?.status === 401) {
+          setSubmitError('Please log in again before submitting your quiz.');
+        } else if (err.response?.status === 403) {
+          setSubmitError('You are not allowed to submit this attempt.');
+        } else if (err.response?.status === 404) {
+          setSubmitError('This attempt could not be found.');
+        } else if (err.response?.status === 409) {
+          setSubmitError(
+            'This attempt could not be submitted in its current state. Try opening the quiz again.'
+          );
+        } else {
+          setSubmitError(err.message || 'Could not submit the quiz. Please try again.');
+        }
+      }
+    },
+    [navigate]
+  );
+
+  // The countdown is a display; the server enforces the actual deadline (NFR-003).
+  // At zero the attempt is submitted automatically and the student sees the score (FR-017).
   useEffect(() => {
     if (!attempt) return undefined;
 
     const tick = () => {
-      setTimeLeft(remainingMs(attempt.deadlineAt, serverNow.current()));
+      const left = remainingMs(attempt.deadlineAt, serverNow.current());
+      setTimeLeft(left);
+      if (left === 0) {
+        clearInterval(timer);
+        submitAttempt(attempt.id);
+      }
     };
 
-    tick();
     const timer = setInterval(tick, 1000);
+    tick();
 
     return () => clearInterval(timer);
-  }, [attempt]);
+  }, [attempt, submitAttempt]);
 
   async function choose(questionId, selectedOption) {
     if (timeLeft === 0 || isSubmitting || submissionStarted.current) return;
@@ -97,45 +141,14 @@ export default function TakeQuiz() {
     }
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (isSubmitting || submissionStarted.current) return;
 
     const confirmed = window.confirm(
       'Are you sure you want to submit this quiz? You cannot change your answers after submission.'
     );
 
-    if (!confirmed) return;
-
-    submissionStarted.current = true;
-    setIsSubmitting(true);
-    setSubmitError('');
-
-    try {
-      const response = await api.post(`/attempts/${attempt.id}/submit`);
-
-      if (response.data.result?.status !== 'finalized') {
-        throw new Error('The server has not finalized this attempt.');
-      }
-
-      navigate(`/attempts/${attempt.id}/result`, { replace: true });
-    } catch (err) {
-      submissionStarted.current = false;
-      setIsSubmitting(false);
-
-      if (err.response?.status === 401) {
-        setSubmitError('Please log in again before submitting your quiz.');
-      } else if (err.response?.status === 403) {
-        setSubmitError('You are not allowed to submit this attempt.');
-      } else if (err.response?.status === 404) {
-        setSubmitError('This attempt could not be found.');
-      } else if (err.response?.status === 409) {
-        setSubmitError(
-          'This attempt could not be submitted in its current state. Try opening the quiz again.'
-        );
-      } else {
-        setSubmitError(err.message || 'Could not submit the quiz. Please try again.');
-      }
-    }
+    if (confirmed) submitAttempt(attempt.id);
   }
 
   if (error) {
@@ -173,8 +186,7 @@ export default function TakeQuiz() {
 
       {timeUp && (
         <p role="alert">
-          Time is up. Submit the quiz to view your result. Only answers saved before the deadline
-          will be scored.
+          Time is up. Submitting your answers - only answers saved before the deadline are scored.
         </p>
       )}
 

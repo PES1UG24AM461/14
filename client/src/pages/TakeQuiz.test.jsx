@@ -97,11 +97,37 @@ describe('OQS-11: Take Quiz page', () => {
   });
 
   it('shows when time is up and stops answers from being changed', async () => {
-    vi.spyOn(api, 'post').mockResolvedValue(startResponse([], 0));
+    vi.spyOn(api, 'post')
+      .mockResolvedValueOnce(startResponse([], 0))
+      .mockReturnValueOnce(new Promise(() => {})); // auto-submit still in flight
     renderTakeQuiz();
 
     expect(await screen.findByText(/Time is up/)).toBeInTheDocument();
     expect(screen.getByLabelText('4')).toBeDisabled();
+  });
+
+  it('TC-ATT-08 submits automatically at zero without asking and shows the result page', async () => {
+    const confirm = vi.spyOn(window, 'confirm');
+    const post = vi
+      .spyOn(api, 'post')
+      .mockResolvedValueOnce(startResponse([], 0))
+      .mockResolvedValueOnce({ data: { result: { status: 'finalized', score: 0 } } });
+    renderTakeQuiz();
+
+    expect(await screen.findByText('Result Page')).toBeInTheDocument();
+    expect(post).toHaveBeenLastCalledWith('/attempts/a1/submit');
+    expect(post).toHaveBeenCalledTimes(2);
+    expect(confirm).not.toHaveBeenCalled();
+  });
+
+  it('lets the student retry if the automatic submission fails', async () => {
+    vi.spyOn(api, 'post')
+      .mockResolvedValueOnce(startResponse([], 0))
+      .mockRejectedValueOnce(new Error('Network Error'));
+    renderTakeQuiz();
+
+    expect(await screen.findByText('Network Error')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Submit Quiz' })).toBeEnabled();
   });
 
   it('TC-ATT-11 shows the time left by the server clock, not the computer clock', async () => {

@@ -46,17 +46,8 @@ export function createAttemptsRouter(auth = authenticate) {
   // POST /api/attempts/:attemptId/submit - submit and score an attempt (FR-016, FR-019)
   router.post('/attempts/:attemptId/submit', auth, requireStudent, async (req, res, next) => {
     try {
-      const attempt = await submitAttempt(req.user.id, req.params.attemptId);
-
-      return res.status(200).json({
-        result: {
-          attemptId: String(attempt._id),
-          quizId: String(attempt.quizId),
-          status: attempt.status,
-          score: attempt.score,
-          submittedAt: attempt.submittedAt,
-        },
-      });
+      const result = await submitAttempt(req.user.id, req.params.attemptId);
+      return res.status(200).json({ result });
     } catch (err) {
       return next(err);
     }
