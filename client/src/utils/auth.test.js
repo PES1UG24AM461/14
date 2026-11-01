@@ -40,4 +40,3 @@ describe('auth utilities', () => {
     expect(getStoredUser()).toBeNull();
   });
 });
-

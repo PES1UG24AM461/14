@@ -127,4 +127,3 @@ describe('OQS-05: Login page', () => {
     );
   });
 });
-

@@ -75,4 +75,3 @@ describe('Database seed script', () => {
     await expect(runSeed('')).rejects.toThrow('MONGODB_URI is required to run the seed script.');
   });
 });
-
