@@ -44,25 +44,20 @@ export default function Navbar() {
   }
 
   return (
-    <header style={{ borderBottom: '1px solid #e5e7eb', background: '#ffffff' }}>
-      <nav
-        className="page"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '12px 16px',
-        }}
-      >
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link to="/" style={{ fontWeight: 'bold', textDecoration: 'none', color: '#1f2937' }}>
+    <header className="site-header">
+      <nav className="navbar" aria-label="Main">
+        <div className="nav-links">
+          <Link to="/" className="brand">
             Online Quiz System
           </Link>
           <Link to="/quizzes">Quizzes</Link>
           {isStaff(user) && <Link to="/manage/quizzes">Quiz Management</Link>}
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact</Link>
+          <Link to="/feedback">Feedback</Link>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div className="nav-links">
           {user ? (
             <>
               <span>

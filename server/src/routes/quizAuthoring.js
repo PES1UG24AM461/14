@@ -5,6 +5,8 @@ import {
   deleteQuiz,
   getManagedQuiz,
   listManageableQuizzes,
+  publishQuiz,
+  unpublishQuiz,
   updateQuiz,
 } from '../services/quizAuthoring.js';
 
@@ -70,6 +72,20 @@ export function createQuizAuthoringRouter(auth = authenticate) {
       await deleteQuiz(req.user, req.params.quizId);
       res.status(204).end();
     })
+  );
+
+  // POST /api/quizzes/:quizId/publish - validate and publish a complete quiz (SAD 4.3, FR-011, FR-012)
+  router.post(
+    '/quizzes/:quizId/publish',
+    staff,
+    handle(async (req, res) => res.json({ quiz: await publishQuiz(req.user, req.params.quizId) }))
+  );
+
+  // POST /api/quizzes/:quizId/unpublish - remove a quiz from student discovery (SAD 4.3, FR-011)
+  router.post(
+    '/quizzes/:quizId/unpublish',
+    staff,
+    handle(async (req, res) => res.json({ quiz: await unpublishQuiz(req.user, req.params.quizId) }))
   );
 
   return router;
