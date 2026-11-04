@@ -31,10 +31,10 @@ The backlog is tracked as GitHub issues in this repository and in the linked Git
 
 ## Sprints
 
-| Sprint   | Dates          | Outcome                                             |
-| -------- | -------------- | --------------------------------------------------- |
-| Sprint 1 | 19-23 Oct 2026 | Working MVP; demo video in `docs/sprint-videos/`    |
-| Sprint 2 | 26-30 Oct 2026 | Complete product, documentation, development frozen |
+| Sprint   | Dates          | Outcome                                                                |
+| -------- | -------------- | ---------------------------------------------------------------------- |
+| Sprint 1 | 19-23 Oct 2026 | Working MVP; demo video: [sprint1.mp4](docs/sprint-videos/sprint1.mp4) |
+| Sprint 2 | 26-30 Oct 2026 | Complete product, documentation, development frozen                    |
 
 ## Contributing
 
