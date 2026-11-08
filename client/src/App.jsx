@@ -12,6 +12,7 @@ import QuizManagement from './pages/QuizManagement.jsx';
 import QuizTopics from './pages/QuizTopics.jsx';
 import Register from './pages/Register.jsx';
 import TakeQuiz from './pages/TakeQuiz.jsx';
+import UserManagement from './pages/UserManagement.jsx';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/quizzes/:quizId/take" element={<TakeQuiz />} />
         <Route path="/attempts/:attemptId/result" element={<AttemptResult />} />
         <Route path="/manage/quizzes" element={<QuizManagement />} />
+        <Route path="/admin/users" element={<UserManagement />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/feedback" element={<Feedback />} />

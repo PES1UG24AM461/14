@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
-import { clearAuth, getStoredToken, getStoredUser, isStaff } from '../utils/auth.js';
+import { clearAuth, getStoredToken, getStoredUser, isAdmin, isStaff } from '../utils/auth.js';
 
 export default function Navbar() {
   const [user, setUser] = useState(getStoredUser);
@@ -52,6 +52,7 @@ export default function Navbar() {
           </Link>
           <Link to="/quizzes">Quizzes</Link>
           {isStaff(user) && <Link to="/manage/quizzes">Quiz Management</Link>}
+          {isAdmin(user) && <Link to="/admin/users">User Management</Link>}
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/feedback">Feedback</Link>

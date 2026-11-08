@@ -31,6 +31,7 @@ describe('Navbar role-based navigation visibility', () => {
     expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
     expect(screen.getByRole('link', { name: 'Register' })).toHaveAttribute('href', '/register');
     expect(screen.queryByRole('link', { name: 'Quiz Management' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument();
   });
 
@@ -45,6 +46,7 @@ describe('Navbar role-based navigation visibility', () => {
 
     expect(screen.getByText('Student One (student)')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Quiz Management' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument();
   });
@@ -62,9 +64,10 @@ describe('Navbar role-based navigation visibility', () => {
     const manageLink = screen.getByRole('link', { name: 'Quiz Management' });
     expect(manageLink).toBeInTheDocument();
     expect(manageLink).toHaveAttribute('href', '/manage/quizzes');
+    expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
   });
 
-  it('administrators see the Quiz Management option', () => {
+  it('administrators see the Quiz Management and User Management options', () => {
     localStorage.setItem('token', 'token-admin');
     localStorage.setItem(
       'user',
@@ -77,6 +80,10 @@ describe('Navbar role-based navigation visibility', () => {
     const manageLink = screen.getByRole('link', { name: 'Quiz Management' });
     expect(manageLink).toBeInTheDocument();
     expect(manageLink).toHaveAttribute('href', '/manage/quizzes');
+
+    const userLink = screen.getByRole('link', { name: 'User Management' });
+    expect(userLink).toBeInTheDocument();
+    expect(userLink).toHaveAttribute('href', '/admin/users');
   });
 
   it('syncs user role from GET /roles/me when token is present', async () => {

@@ -36,3 +36,7 @@ export function clearAuth() {
 export function isStaff(user) {
   return user?.role === 'faculty' || user?.role === 'administrator';
 }
+
+export function isAdmin(user) {
+  return user?.role === 'administrator';
+}
