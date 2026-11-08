@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { validateObjectIdParam } from '../middleware/validateObjectIdParam.js';
+
 import { authenticate } from '../middleware/authenticate.js';
 import {
   getAttemptResult,
@@ -24,7 +26,7 @@ export function createAttemptsRouter(auth = authenticate) {
   const router = Router();
 
   // POST /api/quizzes/:quizId/attempts - start or resume an attempt (FR-013)
-  router.post('/quizzes/:quizId/attempts', auth, requireStudent, async (req, res, next) => {
+  router.post('/quizzes/:quizId/attempts', auth, requireStudent, validateObjectIdParam('quizId'), async (req, res, next) => {
     try {
       const { created, ...body } = await startOrResumeAttempt(req.user.id, req.params.quizId);
       return res.status(created ? 201 : 200).json(body);
@@ -34,7 +36,7 @@ export function createAttemptsRouter(auth = authenticate) {
   });
 
   // PATCH /api/attempts/:attemptId/answers - save answers (FR-015)
-  router.patch('/attempts/:attemptId/answers', auth, requireStudent, async (req, res, next) => {
+  router.patch('/attempts/:attemptId/answers', auth, requireStudent, validateObjectIdParam('attemptId'), async (req, res, next) => {
     try {
       const attempt = await saveAnswers(req.user.id, req.params.attemptId, req.body?.answers);
       return res.status(200).json({ attempt });
@@ -44,7 +46,7 @@ export function createAttemptsRouter(auth = authenticate) {
   });
 
   // POST /api/attempts/:attemptId/submit - submit and score an attempt (FR-016, FR-019)
-  router.post('/attempts/:attemptId/submit', auth, requireStudent, async (req, res, next) => {
+  router.post('/attempts/:attemptId/submit', auth, requireStudent, validateObjectIdParam('attemptId'), async (req, res, next) => {
     try {
       const result = await submitAttempt(req.user.id, req.params.attemptId);
       return res.status(200).json({ result });
@@ -54,7 +56,7 @@ export function createAttemptsRouter(auth = authenticate) {
   });
 
   // GET /api/attempts/:attemptId/result - retrieve a submitted result (FR-020)
-  router.get('/attempts/:attemptId/result', auth, requireStudent, async (req, res, next) => {
+  router.get('/attempts/:attemptId/result', auth, requireStudent, validateObjectIdParam('attemptId'), async (req, res, next) => {
     try {
       const result = await getAttemptResult(req.user.id, req.params.attemptId);
       return res.status(200).json({ result });
