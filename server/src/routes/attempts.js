@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { validateObjectIdParam } from '../middleware/validateObjectIdParam.js';
-
 import { authenticate } from '../middleware/authenticate.js';
 import {
   getAttemptResult,
@@ -28,9 +27,9 @@ export function createAttemptsRouter(auth = authenticate) {
   // POST /api/quizzes/:quizId/attempts - start or resume an attempt (FR-013)
   router.post(
     '/quizzes/:quizId/attempts',
+    validateObjectIdParam('quizId'),
     auth,
     requireStudent,
-    validateObjectIdParam('quizId'),
     async (req, res, next) => {
       try {
         const { created, ...body } = await startOrResumeAttempt(req.user.id, req.params.quizId);
@@ -44,9 +43,9 @@ export function createAttemptsRouter(auth = authenticate) {
   // PATCH /api/attempts/:attemptId/answers - save answers (FR-015)
   router.patch(
     '/attempts/:attemptId/answers',
+    validateObjectIdParam('attemptId'),
     auth,
     requireStudent,
-    validateObjectIdParam('attemptId'),
     async (req, res, next) => {
       try {
         const attempt = await saveAnswers(req.user.id, req.params.attemptId, req.body?.answers);
@@ -60,9 +59,9 @@ export function createAttemptsRouter(auth = authenticate) {
   // POST /api/attempts/:attemptId/submit - submit and score an attempt (FR-016, FR-019)
   router.post(
     '/attempts/:attemptId/submit',
+    validateObjectIdParam('attemptId'),
     auth,
     requireStudent,
-    validateObjectIdParam('attemptId'),
     async (req, res, next) => {
       try {
         const result = await submitAttempt(req.user.id, req.params.attemptId);
@@ -76,9 +75,9 @@ export function createAttemptsRouter(auth = authenticate) {
   // GET /api/attempts/:attemptId/result - retrieve a submitted result (FR-020)
   router.get(
     '/attempts/:attemptId/result',
+    validateObjectIdParam('attemptId'),
     auth,
     requireStudent,
-    validateObjectIdParam('attemptId'),
     async (req, res, next) => {
       try {
         const result = await getAttemptResult(req.user.id, req.params.attemptId);
