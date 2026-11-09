@@ -32,6 +32,7 @@ describe('Navbar role-based navigation visibility', () => {
     expect(screen.getByRole('link', { name: 'Register' })).toHaveAttribute('href', '/register');
     expect(screen.queryByRole('link', { name: 'Quiz Management' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Feedback Review' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Log out' })).not.toBeInTheDocument();
   });
 
@@ -47,6 +48,7 @@ describe('Navbar role-based navigation visibility', () => {
     expect(screen.getByText('Student One (student)')).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Quiz Management' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Feedback Review' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Log in' })).not.toBeInTheDocument();
   });
@@ -65,9 +67,10 @@ describe('Navbar role-based navigation visibility', () => {
     expect(manageLink).toBeInTheDocument();
     expect(manageLink).toHaveAttribute('href', '/manage/quizzes');
     expect(screen.queryByRole('link', { name: 'User Management' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Feedback Review' })).not.toBeInTheDocument();
   });
 
-  it('administrators see the Quiz Management and User Management options', () => {
+  it('administrators see the Quiz Management, User Management and Feedback Review options', () => {
     localStorage.setItem('token', 'token-admin');
     localStorage.setItem(
       'user',
@@ -84,6 +87,10 @@ describe('Navbar role-based navigation visibility', () => {
     const userLink = screen.getByRole('link', { name: 'User Management' });
     expect(userLink).toBeInTheDocument();
     expect(userLink).toHaveAttribute('href', '/admin/users');
+
+    const feedbackLink = screen.getByRole('link', { name: 'Feedback Review' });
+    expect(feedbackLink).toBeInTheDocument();
+    expect(feedbackLink).toHaveAttribute('href', '/admin/feedback');
   });
 
   it('syncs user role from GET /roles/me when token is present', async () => {

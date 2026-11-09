@@ -53,6 +53,7 @@ export default function Navbar() {
           <Link to="/quizzes">Quizzes</Link>
           {isStaff(user) && <Link to="/manage/quizzes">Quiz Management</Link>}
           {isAdmin(user) && <Link to="/admin/users">User Management</Link>}
+          {isAdmin(user) && <Link to="/admin/feedback">Feedback Review</Link>}
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/feedback">Feedback</Link>

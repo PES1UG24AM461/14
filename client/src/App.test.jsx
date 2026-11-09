@@ -48,6 +48,16 @@ describe('Client scaffold (OQS-01)', () => {
     expect(screen.getByRole('heading', { name: 'User Management' })).toBeInTheDocument();
   });
 
+  it('renders the Feedback Review page at /admin/feedback', () => {
+    localStorage.setItem('token', 'token-admin');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({ id: 'a1', name: 'Admin', role: 'administrator' })
+    );
+    renderAt('/admin/feedback');
+    expect(screen.getByRole('heading', { name: 'Feedback Review' })).toBeInTheDocument();
+  });
+
   it('renders a not-found page for unknown routes', () => {
     renderAt('/no-such-page');
     expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
