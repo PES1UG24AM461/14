@@ -97,13 +97,29 @@ describe('OQS-13: Feedback page', () => {
     expect(screen.getByLabelText('Message')).toHaveValue('');
   });
 
-  it('TC-UX-02 asks for a message instead of sending an empty one', () => {
+  it('TC-FB-01 accepts a rating without a message, or a message without a rating', async () => {
+    renderLoggedIn();
+    const post = vi.spyOn(api, 'post').mockResolvedValue({ data: {} });
+
+    fireEvent.change(screen.getByLabelText('Rating'), { target: { value: '3' } });
+    send('');
+    await screen.findByRole('status');
+    expect(post).toHaveBeenLastCalledWith('/feedback', { rating: 3 });
+
+    send('Just a message');
+    await vi.waitFor(() => expect(post).toHaveBeenCalledTimes(2));
+    expect(post).toHaveBeenLastCalledWith('/feedback', { message: 'Just a message' });
+  });
+
+  it('TC-FB-02 TC-UX-02 asks for a rating or a message when both are empty', () => {
     renderLoggedIn();
     const post = vi.spyOn(api, 'post');
 
     send('   ');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Please write a message.');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Please choose a rating or write a message.'
+    );
     expect(post).not.toHaveBeenCalled();
   });
 
