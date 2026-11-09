@@ -38,6 +38,16 @@ describe('Client scaffold (OQS-01)', () => {
     expect(screen.getByRole('heading', { name: 'Quiz Management' })).toBeInTheDocument();
   });
 
+  it('renders the User Management page at /admin/users', () => {
+    localStorage.setItem('token', 'token-admin');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({ id: 'a1', name: 'Admin', role: 'administrator' })
+    );
+    renderAt('/admin/users');
+    expect(screen.getByRole('heading', { name: 'User Management' })).toBeInTheDocument();
+  });
+
   it('renders the Feedback Review page at /admin/feedback', () => {
     localStorage.setItem('token', 'token-admin');
     localStorage.setItem(
