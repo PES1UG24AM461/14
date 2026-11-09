@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
 import About from './pages/About.jsx';
+import AdminFeedback from './pages/AdminFeedback.jsx';
 import AttemptResult from './pages/AttemptResult.jsx';
 import Contact from './pages/Contact.jsx';
 import Feedback from './pages/Feedback.jsx';
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/quizzes/:quizId/take" element={<TakeQuiz />} />
         <Route path="/attempts/:attemptId/result" element={<AttemptResult />} />
         <Route path="/manage/quizzes" element={<QuizManagement />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/feedback" element={<Feedback />} />
