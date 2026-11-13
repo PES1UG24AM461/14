@@ -12,6 +12,8 @@ import QuizManagement from './pages/QuizManagement.jsx';
 import QuizTopics from './pages/QuizTopics.jsx';
 import Register from './pages/Register.jsx';
 import TakeQuiz from './pages/TakeQuiz.jsx';
+import MyScores from './pages/MyScores.jsx';
+
 
 export default function App() {
   return (
@@ -29,6 +31,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/feedback" element={<Feedback />} />
+        <Route path="/scores" element={<MyScores />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

@@ -95,6 +95,22 @@ export async function finalizeExpiredAttempts(now = new Date()) {
  * Creates the attempt with a server-side deadline, or resumes the student's active attempt.
  * A finalized attempt cannot be restarted (409). Safe against concurrent start requests (TC-ATT-13).
  */
+export async function getMyScores(userId) {
+  // Return only finalized attempts for this student with quiz title, score, and submission date
+  const attempts = await Attempt.find({
+    userId,
+    status: 'finalized',
+  })
+    .populate('quizId', 'title')
+    .sort({ submittedAt: -1 })
+    .lean();
+  return attempts.map((a) => ({
+    quizTitle: a.quizId?.title ?? '',
+    score: a.score,
+    submittedAt: a.submittedAt,
+  }));
+}
+
 export async function startOrResumeAttempt(userId, quizId, now = new Date()) {
   requireObjectId(quizId, 'quiz');
   const quiz = await Quiz.findOne({ _id: quizId, status: 'published' })

@@ -51,6 +51,7 @@ export default function Navbar() {
             Online Quiz System
           </Link>
           <Link to="/quizzes">Quizzes</Link>
+          {user?.role === 'student' && <Link to="/scores">My Scores</Link>}
           {isStaff(user) && <Link to="/manage/quizzes">Quiz Management</Link>}
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>

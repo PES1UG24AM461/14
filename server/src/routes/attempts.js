@@ -5,6 +5,7 @@ import {
   saveAnswers,
   startOrResumeAttempt,
   submitAttempt,
+  getMyScores,
 } from '../services/attempts.js';
 
 function requireStudent(req, res, next) {
@@ -58,6 +59,16 @@ export function createAttemptsRouter(auth = authenticate) {
     try {
       const result = await getAttemptResult(req.user.id, req.params.attemptId);
       return res.status(200).json({ result });
+    } catch (err) {
+      return next(err);
+    }
+  });
+
+  // GET /api/me/scores - student's completed attempts (FR-021)
+  router.get('/me/scores', auth, requireStudent, async (req, res, next) => {
+    try {
+      const scores = await getMyScores(req.user.id);
+      return res.status(200).json({ scores });
     } catch (err) {
       return next(err);
     }
