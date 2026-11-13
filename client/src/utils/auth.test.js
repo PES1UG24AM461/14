@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { clearAuth, getStoredToken, getStoredUser, isStaff, setAuth } from './auth.js';
+import { clearAuth, getStoredToken, getStoredUser, isAdmin, isStaff, setAuth } from './auth.js';
 
 describe('auth utilities', () => {
   beforeEach(() => {
@@ -33,6 +33,13 @@ describe('auth utilities', () => {
     expect(isStaff({ role: 'student' })).toBe(false);
     expect(isStaff({ role: 'faculty' })).toBe(true);
     expect(isStaff({ role: 'administrator' })).toBe(true);
+  });
+
+  it('determines administrator role correctly', () => {
+    expect(isAdmin(null)).toBe(false);
+    expect(isAdmin({ role: 'student' })).toBe(false);
+    expect(isAdmin({ role: 'faculty' })).toBe(false);
+    expect(isAdmin({ role: 'administrator' })).toBe(true);
   });
 
   it('handles invalid JSON in localStorage safely', () => {
