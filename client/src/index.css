@@ -102,6 +102,11 @@ fieldset.question {
   gap: 8px 16px;
 }
 
+/* Keep the account links on the right when the admin menu wraps onto a second line. */
+.navbar > .nav-links:last-child {
+  margin-left: auto;
+}
+
 .brand {
   font-weight: bold;
   text-decoration: none;

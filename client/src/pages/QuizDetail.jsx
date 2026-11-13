@@ -42,10 +42,14 @@ export default function QuizDetail() {
             <dd>{quiz.questionCount}</dd>
           </dl>
           <p>You can attempt this quiz once. The timer starts when you begin.</p>
-          <Link to={`/quizzes/${quiz.id}/take`}>Start quiz</Link>
+          <p>
+            <Link to={`/quizzes/${quiz.id}/take`}>Start quiz</Link>
+          </p>
         </>
       )}
-      <Link to="/quizzes">Back to all quizzes</Link>
+      <p>
+        <Link to="/quizzes">Back to all quizzes</Link>
+      </p>
     </main>
   );
 }
