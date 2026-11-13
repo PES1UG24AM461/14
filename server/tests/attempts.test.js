@@ -71,8 +71,7 @@ const submit = (attemptId, user = studentA) =>
 const getResult = (attemptId, user = studentA) =>
   request(app).get(`/api/attempts/${attemptId}/result`).set(as(user));
 
-const getScores = (user = studentA) =>
-  request(app).get('/api/me/scores').set(as(user));
+const getScores = (user = studentA) => request(app).get('/api/me/scores').set(as(user));
 
 describe('OQS-11: start or resume an attempt and save answers', () => {
   beforeAll(async () => {
@@ -457,12 +456,20 @@ describe('OQS-16: My Scores (history of completed attempts)', () => {
 
     // Student A completes quiz1
     const attempt1 = await start(quiz1._id, studentA);
-    await save(attempt1.body.attempt.id, [{ questionId: String(q1[0]._id), selectedOption: 0 }], studentA);
+    await save(
+      attempt1.body.attempt.id,
+      [{ questionId: String(q1[0]._id), selectedOption: 0 }],
+      studentA
+    );
     await submit(attempt1.body.attempt.id, studentA);
 
     // Student A completes quiz2
     const attempt2 = await start(quiz2._id, studentA);
-    await save(attempt2.body.attempt.id, [{ questionId: String(q2[0]._id), selectedOption: 0 }], studentA);
+    await save(
+      attempt2.body.attempt.id,
+      [{ questionId: String(q2[0]._id), selectedOption: 0 }],
+      studentA
+    );
     await submit(attempt2.body.attempt.id, studentA);
 
     const res = await getScores(studentA);
@@ -497,7 +504,11 @@ describe('OQS-16: My Scores (history of completed attempts)', () => {
 
     // Student A completes quiz1 (finalized)
     const attemptA = await start(quiz1._id, studentA);
-    await save(attemptA.body.attempt.id, [{ questionId: String(q1[0]._id), selectedOption: 0 }], studentA);
+    await save(
+      attemptA.body.attempt.id,
+      [{ questionId: String(q1[0]._id), selectedOption: 0 }],
+      studentA
+    );
     await submit(attemptA.body.attempt.id, studentA);
 
     // Student A starts quiz2 (remains in_progress)

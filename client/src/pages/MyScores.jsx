@@ -37,7 +37,8 @@ export default function MyScores() {
         <ul>
           {scores.map((attempt, index) => (
             <li key={index}>
-              <strong>{attempt.quizTitle}</strong> - Score: <strong>{attempt.score}</strong> - Submitted:{' '}
+              <strong>{attempt.quizTitle}</strong> - Score: <strong>{attempt.score}</strong> -
+              Submitted:{' '}
               {attempt.submittedAt ? new Date(attempt.submittedAt).toLocaleString() : '-'}
             </li>
           ))}
