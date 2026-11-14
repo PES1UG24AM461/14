@@ -5,9 +5,9 @@ import { getStoredToken } from '../utils/auth.js';
 
 const MAX_MESSAGE = 1000;
 
-// Feedback page (FR-007). Feedback is stored by POST /api/feedback (OQS-18, FR-024).
+// Feedback page (FR-007). A rating or a message is enough; POST /api/feedback stores it (OQS-18, FR-024).
 export default function Feedback() {
-  const [rating, setRating] = useState('5');
+  const [rating, setRating] = useState('');
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -28,16 +28,20 @@ export default function Feedback() {
     event.preventDefault();
     setStatus('');
     setError('');
-    if (!message.trim()) {
-      setError('Please write a message.');
+    const text = message.trim();
+    if (!rating && !text) {
+      setError('Please choose a rating or write a message.');
       return;
     }
     setSending(true);
     try {
-      await api.post('/feedback', { rating: Number(rating), message: message.trim() });
+      await api.post('/feedback', {
+        ...(rating && { rating: Number(rating) }),
+        ...(text && { message: text }),
+      });
       setStatus('Thank you for your feedback.');
       setMessage('');
-      setRating('5');
+      setRating('');
     } catch (err) {
       if (err.response?.status === 401) setError('Please log in again to send feedback.');
       else if (err.response?.status === 404)
@@ -61,6 +65,7 @@ export default function Feedback() {
             value={rating}
             onChange={(event) => setRating(event.target.value)}
           >
+            <option value="">No rating</option>
             {[5, 4, 3, 2, 1].map((n) => (
               <option key={n} value={n}>
                 {n} - {['Very poor', 'Poor', 'Okay', 'Good', 'Excellent'][n - 1]}
