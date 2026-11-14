@@ -71,6 +71,8 @@ const submit = (attemptId, user = studentA) =>
 const getResult = (attemptId, user = studentA) =>
   request(app).get(`/api/attempts/${attemptId}/result`).set(as(user));
 
+const getScores = (user = studentA) => request(app).get('/api/me/scores').set(as(user));
+
 describe('OQS-11: start or resume an attempt and save answers', () => {
   beforeAll(async () => {
     await connectTestDB();
@@ -427,5 +429,113 @@ describe('OQS-12: submit attempt and automatic scoring', () => {
     const started = await start(quiz._id);
 
     expect((await getResult(started.body.attempt.id)).status).toBe(409);
+  });
+});
+
+describe('OQS-16: My Scores (history of completed attempts)', () => {
+  beforeAll(async () => {
+    await connectTestDB();
+    await Attempt.init();
+  });
+
+  afterEach(clearTestDB);
+  afterAll(closeTestDB);
+
+  it('TC-SCR-05 student can retrieve their own finalized attempts with quiz title, score and submission date', async () => {
+    const { quiz: quiz1, questions: q1 } = await seedQuiz();
+    const quiz2 = await Quiz.create({
+      title: 'Advanced JavaScript',
+      topic: 'Programming',
+      durationSeconds: 300,
+      status: 'published',
+      createdBy: new mongoose.Types.ObjectId(),
+    });
+    const q2 = await Question.insertMany([
+      { quizId: quiz2._id, prompt: 'Q1', options: ['a', 'b'], correctOption: 0 },
+    ]);
+
+    // Student A completes quiz1
+    const attempt1 = await start(quiz1._id, studentA);
+    await save(
+      attempt1.body.attempt.id,
+      [{ questionId: String(q1[0]._id), selectedOption: 0 }],
+      studentA
+    );
+    await submit(attempt1.body.attempt.id, studentA);
+
+    // Student A completes quiz2
+    const attempt2 = await start(quiz2._id, studentA);
+    await save(
+      attempt2.body.attempt.id,
+      [{ questionId: String(q2[0]._id), selectedOption: 0 }],
+      studentA
+    );
+    await submit(attempt2.body.attempt.id, studentA);
+
+    const res = await getScores(studentA);
+    expect(res.status).toBe(200);
+    expect(res.body.scores).toHaveLength(2);
+
+    // Most recent submission first (quiz2 submitted after quiz1)
+    expect(res.body.scores[0].quizTitle).toBe('Advanced JavaScript');
+    expect(res.body.scores[0].score).toBe(1);
+    expect(res.body.scores[0].submittedAt).toBeTruthy();
+
+    expect(res.body.scores[1].quizTitle).toBe('JavaScript Basics');
+    expect(res.body.scores[1].score).toBe(1);
+    expect(res.body.scores[1].submittedAt).toBeTruthy();
+
+    // Verify sensitive data (answers, question details) are not exposed
+    for (const item of res.body.scores) {
+      expect(item.answers).toBeUndefined();
+      expect(item.questions).toBeUndefined();
+    }
+  });
+
+  it('TC-SCR-06 attempts belonging to another student and non-finalized attempts are not returned', async () => {
+    const { quiz: quiz1, questions: q1 } = await seedQuiz();
+    const quiz2 = await Quiz.create({
+      title: 'Other Quiz',
+      topic: 'Programming',
+      durationSeconds: 300,
+      status: 'published',
+      createdBy: new mongoose.Types.ObjectId(),
+    });
+
+    // Student A completes quiz1 (finalized)
+    const attemptA = await start(quiz1._id, studentA);
+    await save(
+      attemptA.body.attempt.id,
+      [{ questionId: String(q1[0]._id), selectedOption: 0 }],
+      studentA
+    );
+    await submit(attemptA.body.attempt.id, studentA);
+
+    // Student A starts quiz2 (remains in_progress)
+    await start(quiz2._id, studentA);
+
+    // Student B completes quiz2 (finalized for studentB)
+    const attemptB = await start(quiz2._id, studentB);
+    await submit(attemptB.body.attempt.id, studentB);
+
+    // When Student A requests /api/me/scores:
+    const resA = await getScores(studentA);
+    expect(resA.status).toBe(200);
+    expect(resA.body.scores).toHaveLength(1);
+    expect(resA.body.scores[0].quizTitle).toBe('JavaScript Basics');
+
+    // When Student B requests /api/me/scores:
+    const resB = await getScores(studentB);
+    expect(resB.status).toBe(200);
+    expect(resB.body.scores).toHaveLength(1);
+    expect(resB.body.scores[0].quizTitle).toBe('Other Quiz');
+
+    // Unauthenticated request is rejected
+    const unauthenticated = await request(app).get('/api/me/scores');
+    expect(unauthenticated.status).toBe(401);
+
+    // Non-student (faculty) is rejected
+    const faculty = await request(app).get('/api/me/scores').set(as(studentA, 'faculty'));
+    expect(faculty.status).toBe(403);
   });
 });
