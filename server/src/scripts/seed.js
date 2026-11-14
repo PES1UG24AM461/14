@@ -7,7 +7,14 @@ import { config } from '../config/env.js';
 import User from '../models/User.js';
 
 export function getSeedUserDefinitions(env = process.env) {
-  const defaultPassword = env.SEED_PASSWORD || 'SeedPassword123!';
+  const defaultPassword = env.SEED_PASSWORD?.trim();
+  if (!defaultPassword) {
+    throw new Error('SEED_PASSWORD is required to run the seed script.');
+  }
+  if (defaultPassword.length < 8 || defaultPassword.length > 128) {
+    throw new Error('SEED_PASSWORD must contain between 8 and 128 characters.');
+  }
+
   const adminPassword = env.SEED_ADMIN_PASSWORD || defaultPassword;
   const facultyPassword = env.SEED_FACULTY_PASSWORD || defaultPassword;
   const studentPassword = env.SEED_STUDENT_PASSWORD || defaultPassword;
@@ -103,6 +110,8 @@ export async function runSeed(uri = config.mongodbUri || process.env.MONGODB_URI
   if (!uri) {
     throw new Error('MONGODB_URI is required to run the seed script.');
   }
+
+  getSeedUserDefinitions(process.env);
 
   await connectDB(uri);
   try {
