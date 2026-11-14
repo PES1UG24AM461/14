@@ -59,7 +59,12 @@ export default function AttemptResult() {
       </p>
       <p>Status: {result.status}</p>
       <p>Submitted: {result.submittedAt ? new Date(result.submittedAt).toLocaleString() : '—'}</p>
-      <Link to="/quizzes">Back to quizzes</Link>
+      <p>
+        <Link to={`/quizzes/${result.quizId}/leaderboard`}>View leaderboard</Link>
+      </p>
+      <p>
+        <Link to="/quizzes">Back to quizzes</Link>
+      </p>
     </main>
   );
 }
