@@ -97,3 +97,8 @@ server/                 Node.js + Express REST API
 docs/                   sprint plan, deviations log, test results, sprint videos
 Project-Deliverables/   SRS, SAD and STP
 ```
+
+## Dependency Audit Policy
+
+The CI pipeline runs `npm audit --audit-level=high` on every push and pull‑request.
+If any high‑ or critical‑severity vulnerability is reported, the audit step exits with a non‑zero status and the pipeline fails. The failure must be resolved before the change can be merged, ensuring that no vulnerable dependencies are shipped.
