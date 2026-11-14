@@ -115,6 +115,13 @@ export default function TakeQuiz() {
     return () => clearInterval(timer);
   }, [attempt, submitAttempt]);
 
+  const timeWarning =
+    !timeLeft || timeLeft > 60000
+      ? ''
+      : timeLeft <= 10000
+        ? '10 seconds left.'
+        : 'One minute left.';
+
   async function choose(questionId, selectedOption) {
     if (timeLeft === 0 || isSubmitting || submissionStarted.current) return;
 
@@ -176,8 +183,12 @@ export default function TakeQuiz() {
     <main className="page">
       <h1>Take Quiz</h1>
 
-      <p aria-live="polite">
+      <p>
         Time left: <strong>{timeLeft === null ? '--:--' : formatClock(timeLeft)}</strong>
+      </p>
+      {/* NFR-005: announce the time only at warning points, not on every one-second tick. */}
+      <p role="status" className="visually-hidden">
+        {timeWarning}
       </p>
 
       <p>

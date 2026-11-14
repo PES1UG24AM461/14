@@ -57,6 +57,23 @@ describe('OQS-11: Take Quiz page', () => {
     expect(screen.getByLabelText('4')).toBeChecked();
   });
 
+  it('TC-UX-02 announces the time only at warning points, not on every tick', async () => {
+    vi.spyOn(api, 'post').mockResolvedValue(startResponse([], 45));
+    renderTakeQuiz();
+
+    expect(await screen.findByText('One minute left.')).toBeInTheDocument();
+    expect(screen.getByText('One minute left.')).toHaveAttribute('role', 'status');
+    expect(screen.getByText('Time left:').closest('p')).not.toHaveAttribute('aria-live');
+  });
+
+  it('TC-UX-02 makes no time announcement while plenty of time is left', async () => {
+    vi.spyOn(api, 'post').mockResolvedValue(startResponse());
+    renderTakeQuiz();
+
+    await screen.findByText('What is 2 + 2?');
+    expect(screen.queryByText(/left\.$/)).not.toBeInTheDocument();
+  });
+
   it('TC-ATT-05 saves each selected answer to the server immediately', async () => {
     vi.spyOn(api, 'post').mockResolvedValue(startResponse());
     vi.spyOn(api, 'patch').mockResolvedValue({ data: {} });
