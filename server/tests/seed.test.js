@@ -74,4 +74,33 @@ describe('Database seed script', () => {
   it('runSeed rejects when no mongodb uri is provided', async () => {
     await expect(runSeed('')).rejects.toThrow('MONGODB_URI is required to run the seed script.');
   });
+
+  it('throws when SEED_PASSWORD is missing or invalid', () => {
+    expect(() => getSeedUserDefinitions({})).toThrow(
+      'SEED_PASSWORD is required to run the seed script.'
+    );
+    expect(() => getSeedUserDefinitions({ SEED_PASSWORD: '' })).toThrow(
+      'SEED_PASSWORD is required to run the seed script.'
+    );
+    expect(() => getSeedUserDefinitions({ SEED_PASSWORD: '   ' })).toThrow(
+      'SEED_PASSWORD is required to run the seed script.'
+    );
+    expect(() => getSeedUserDefinitions({ SEED_PASSWORD: 'short' })).toThrow(
+      'SEED_PASSWORD must contain between 8 and 128 characters.'
+    );
+  });
+
+  it('runSeed rejects when SEED_PASSWORD is missing', async () => {
+    const original = process.env.SEED_PASSWORD;
+    delete process.env.SEED_PASSWORD;
+    try {
+      await expect(runSeed('mongodb://127.0.0.1:27017/test')).rejects.toThrow(
+        'SEED_PASSWORD is required to run the seed script.'
+      );
+    } finally {
+      if (original !== undefined) {
+        process.env.SEED_PASSWORD = original;
+      }
+    }
+  });
 });
