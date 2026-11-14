@@ -69,7 +69,7 @@ export default function QuizForm({ quiz, onSave, onCancel }) {
 
   return (
     <form onSubmit={handleSubmit} aria-label={quiz ? 'Edit quiz' : 'New quiz'}>
-      <h2>{quiz ? `Edit "${quiz.title}"` : 'New quiz'}</h2>
+      <h1>{quiz ? `Edit "${quiz.title}"` : 'New quiz'}</h1>
 
       <div className="field">
         <label htmlFor="quiz-title">Title</label>

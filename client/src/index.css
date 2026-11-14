@@ -162,3 +162,10 @@ textarea {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Help text under a form field, linked with aria-describedby (NFR-005). */
+.field-hint {
+  display: block;
+  color: #4b5563;
+  margin-top: 2px;
+}
