@@ -130,3 +130,35 @@ textarea {
 .page {
   overflow-wrap: anywhere;
 }
+
+/* Leaderboard table (OQS-17); scrolls inside its box on narrow screens instead of the page (NFR-004). */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.leaderboard {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.leaderboard th,
+.leaderboard td {
+  padding: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.leaderboard tr.is-me {
+  background: #eef2ff;
+  font-weight: bold;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
