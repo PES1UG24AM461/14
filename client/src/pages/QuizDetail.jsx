@@ -45,6 +45,9 @@ export default function QuizDetail() {
           <p>
             <Link to={`/quizzes/${quiz.id}/take`}>Start quiz</Link>
           </p>
+          <p>
+            <Link to={`/quizzes/${quiz.id}/leaderboard`}>View leaderboard</Link>
+          </p>
         </>
       )}
       <p>

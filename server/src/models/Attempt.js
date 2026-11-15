@@ -25,5 +25,7 @@ const attemptSchema = new mongoose.Schema(
 
 // FR-013 / NFR-002: the unique index makes a second attempt record for the same student and quiz impossible.
 attemptSchema.index({ userId: 1, quizId: 1 }, { unique: true });
+// FR-022 / FR-023 / NFR-001: serves the per-quiz leaderboard query and its sort without a scan.
+attemptSchema.index({ quizId: 1, status: 1, score: -1, submittedAt: 1 });
 
 export default mongoose.model('Attempt', attemptSchema);

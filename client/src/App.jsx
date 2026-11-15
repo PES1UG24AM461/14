@@ -9,6 +9,7 @@ import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import NotFound from './pages/NotFound.jsx';
 import QuizDetail from './pages/QuizDetail.jsx';
+import QuizLeaderboard from './pages/QuizLeaderboard.jsx';
 import QuizManagement from './pages/QuizManagement.jsx';
 import QuizTopics from './pages/QuizTopics.jsx';
 import Register from './pages/Register.jsx';
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/quizzes" element={<QuizTopics />} />
         <Route path="/quizzes/:quizId" element={<QuizDetail />} />
         <Route path="/quizzes/:quizId/take" element={<TakeQuiz />} />
+        <Route path="/quizzes/:quizId/leaderboard" element={<QuizLeaderboard />} />
         <Route path="/attempts/:attemptId/result" element={<AttemptResult />} />
         <Route path="/manage/quizzes" element={<QuizManagement />} />
         <Route path="/admin/users" element={<UserManagement />} />

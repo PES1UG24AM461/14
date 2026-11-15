@@ -1,6 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import Register from './Register.jsx';
+
+const render = (ui) => rtlRender(<MemoryRouter>{ui}</MemoryRouter>);
 
 function fillAndSubmit() {
   fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Asha Rao' } });
@@ -38,7 +41,7 @@ describe('OQS-04: Registration page', () => {
     render(<Register />);
     fillAndSubmit();
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Email is already registered');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Email is already registered');
     expect(screen.getByLabelText('Email address')).toHaveValue('asha@example.com');
   });
 
@@ -50,12 +53,18 @@ describe('OQS-04: Registration page', () => {
     expect(screen.getByLabelText('Password')).toHaveAttribute('minLength', '8');
   });
 
+  it('TC-UX-02 explains the password rule next to the field and links it for screen readers', () => {
+    render(<Register />);
+
+    expect(screen.getByLabelText('Password')).toHaveAccessibleDescription('At least 8 characters.');
+  });
+
   it('falls back to a generic message when the server gives no error text', async () => {
     respond(false, {});
     render(<Register />);
     fillAndSubmit();
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Registration failed.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Registration failed.');
   });
 
   it('shows a connection message when the server cannot be reached', async () => {
@@ -63,6 +72,6 @@ describe('OQS-04: Registration page', () => {
     render(<Register />);
     fillAndSubmit();
 
-    expect(await screen.findByRole('status')).toHaveTextContent('Unable to connect');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to connect');
   });
 });

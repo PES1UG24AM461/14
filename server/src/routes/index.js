@@ -7,6 +7,7 @@ import quizAuthoringRouter from './quizAuthoring.js';
 import quizzesRouter from './quizzes.js';
 import userManagementRouter from './userManagement.js';
 import feedbackRouter from './feedback.js';
+import leaderboardRouter from './leaderboard.js';
 
 const router = Router();
 
@@ -18,4 +19,5 @@ router.use(attemptsRouter);
 router.use(quizAuthoringRouter);
 router.use(userManagementRouter);
 router.use(feedbackRouter);
+router.use(leaderboardRouter);
 export default router;

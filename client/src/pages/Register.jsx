@@ -1,15 +1,18 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setMessage('');
+    setError('');
     setLoading(true);
 
     try {
@@ -22,7 +25,7 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        setMessage(data.error || 'Registration failed.');
+        setError(data.error || 'Registration failed.');
         return;
       }
 
@@ -31,7 +34,7 @@ export default function Register() {
       setEmail('');
       setPassword('');
     } catch {
-      setMessage('Unable to connect to the server. Please try again.');
+      setError('Unable to connect to the server. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -78,8 +81,12 @@ export default function Register() {
             minLength={8}
             maxLength={128}
             autoComplete="new-password"
+            aria-describedby="password-hint"
             required
           />
+          <small id="password-hint" className="field-hint">
+            At least 8 characters.
+          </small>
         </div>
 
         <button type="submit" disabled={loading}>
@@ -87,10 +94,11 @@ export default function Register() {
         </button>
 
         {message && <p role="status">{message}</p>}
+        {error && <p role="alert">{error}</p>}
       </form>
 
       <p>
-        Already have an account? <a href="/login">Log in</a>
+        Already have an account? <Link to="/login">Log in</Link>
       </p>
     </main>
   );
