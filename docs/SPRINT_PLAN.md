@@ -56,6 +56,12 @@ Every backlog item is a GitHub issue in this repository and an item in the linke
 | OQS-24 | Documentation: README, API docs and deviations log                     | NFR-006                                  | 2      | Batchu Hari Nainika | Medium   |
 | OQS-25 | Sprint 2 demo video (2 minutes), freeze development and tag v1.0       | -                                        | 1      | Samvith Vaddiparthi | High     |
 
+## Burn-up chart
+
+![Burn-up chart](burnup-chart.png)
+
+Completed story points over time, from the closing dates of issues #1 to #25 on GitHub. The total scope stayed at 79 points (Sprint 1: 47, Sprint 2: 32). Work started on 25 Oct, after the backlog was set up, so both sprints finished later than planned: the last Sprint 1 story closed on 4 Nov and the last Sprint 2 story on 17 Nov.
+
 ## Requirement coverage
 
 | SRS item | Backlog item(s) |
