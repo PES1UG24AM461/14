@@ -1,13 +1,34 @@
+/* Visual style only: every rule targets existing elements and class names, so page markup,
+   behaviour and tests are unchanged. */
+
 :root {
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --text: #1e2433;
+  --muted: #5b6475;
+  --border: #e2e6ef;
+  --primary: #4338ca;
+  --primary-hover: #3730a3;
+  --primary-soft: #eef0ff;
+  --danger: #b42318;
+  --danger-soft: #fef3f2;
+  --success: #067647;
+  --success-soft: #ecfdf3;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --container: 1180px;
+
   font-family:
+    'Inter',
     system-ui,
     -apple-system,
     'Segoe UI',
     Roboto,
     sans-serif;
-  line-height: 1.5;
-  color: #1f2937;
-  background: #f9fafb;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
@@ -16,78 +37,68 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
 }
 
+/* Page container */
 .page {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 32px 16px 56px;
+  overflow-wrap: anywhere;
 }
 
-/* Forms and lists (OQS-09) */
-.field {
-  margin-bottom: 12px;
-}
-
-.field label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.field input {
-  width: 100%;
-  max-width: 480px;
-  padding: 6px 8px;
-}
-
-fieldset.question {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+h1 {
+  font-size: 1.9rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   margin: 0 0 16px;
-  padding: 12px;
 }
 
-.option-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+h2 {
+  font-size: 1.25rem;
+  margin: 28px 0 12px;
 }
 
-.option-row input:not([type='radio']) {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 8px;
+h3 {
+  font-size: 1.05rem;
+  margin: 20px 0 8px;
 }
 
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 8px 0;
+p {
+  margin: 0 0 12px;
 }
 
-.quiz-list {
-  padding-left: 0;
-  list-style: none;
+a {
+  color: var(--primary);
+  font-weight: 500;
+  text-underline-offset: 3px;
 }
 
-.quiz-list li {
-  border-bottom: 1px solid #e5e7eb;
-  padding: 12px 0;
+a:hover {
+  color: var(--primary-hover);
 }
 
-/* Navigation and responsive layout (OQS-13, NFR-004: usable from 375 px without horizontal scrolling) */
+:focus-visible {
+  outline: 3px solid #a5b4fc;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Navigation (OQS-13, NFR-004: usable from 375 px without horizontal scrolling) */
 .site-header {
-  border-bottom: 1px solid #e5e7eb;
-  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
 }
 
 .navbar {
-  max-width: 960px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: 12px 16px;
+  padding: 10px 16px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -99,7 +110,7 @@ fieldset.question {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
+  gap: 2px;
 }
 
 /* Keep the account links on the right when the admin menu wraps onto a second line. */
@@ -107,10 +118,161 @@ fieldset.question {
   margin-left: auto;
 }
 
-.brand {
-  font-weight: bold;
+.nav-links a {
+  color: var(--muted);
   text-decoration: none;
-  color: #1f2937;
+  font-size: 0.92rem;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.nav-links a.brand {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-right: 8px;
+  padding-left: 0;
+}
+
+.nav-links a.brand:hover {
+  background: none;
+}
+
+.nav-links a.brand::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #6366f1, #4338ca);
+  vertical-align: -1px;
+}
+
+.nav-links span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-right: 4px;
+}
+
+/* Buttons */
+button {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+button:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Secondary buttons: navigation, list actions and the log-out button */
+.nav-links button,
+.actions button,
+.option-row button,
+.quiz-list button,
+.user-table button,
+fieldset.question > button {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+.nav-links button:hover:not(:disabled),
+.actions button:hover:not(:disabled),
+.option-row button:hover:not(:disabled),
+.quiz-list button:hover:not(:disabled),
+.user-table button:hover:not(:disabled),
+fieldset.question > button:hover:not(:disabled) {
+  background: var(--bg);
+  border-color: #c9cfdc;
+}
+
+.actions button[type='submit'] {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.actions button[type='submit']:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+/* Forms (OQS-09) */
+form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  max-width: 640px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label,
+form > label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+}
+
+input:not([type='radio']):not([type='checkbox']),
+select,
+textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid #cfd5e1;
+  border-radius: 8px;
+  padding: 9px 12px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+input:not([type='radio']):not([type='checkbox']):focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.15);
+}
+
+.field input {
+  width: 100%;
+  max-width: 480px;
+}
+
+input[type='radio'],
+input[type='checkbox'] {
+  accent-color: var(--primary);
+  width: 18px;
+  height: 18px;
 }
 
 img,
@@ -123,35 +285,284 @@ textarea {
 textarea {
   width: 100%;
   max-width: 480px;
-  padding: 6px 8px;
-  font: inherit;
+  min-height: 110px;
 }
 
-.page {
-  overflow-wrap: anywhere;
+/* Labels sit above their inputs in every form */
+form label:not(.visually-hidden) {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin: 14px 0 6px;
 }
 
-/* Leaderboard table (OQS-17); scrolls inside its box on narrow screens instead of the page (NFR-004). */
+form > label:first-child,
+form > div:first-child label {
+  margin-top: 0;
+}
+
+form input:not([type='radio']):not([type='checkbox']),
+form select,
+form textarea {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+}
+
+form .option-row input:not([type='radio']) {
+  max-width: none;
+}
+
+form button[type='submit'] {
+  margin-top: 18px;
+}
+
+form .actions button {
+  margin-top: 0;
+}
+
+form .actions {
+  margin-top: 18px;
+}
+
+/* Help text under a form field, linked with aria-describedby (NFR-005). */
+.field-hint {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+fieldset.question {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 0 0 16px;
+  padding: 16px;
+}
+
+fieldset.question legend {
+  font-weight: 700;
+  padding: 0 6px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.option-row input:not([type='radio']) {
+  flex: 1;
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+/* Take Quiz: the question card and its answer options */
+main.page > form fieldset:not(.question),
+main.page > fieldset {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  margin: 16px 0;
+}
+
+main.page > fieldset legend,
+main.page > form fieldset:not(.question) legend {
+  float: left;
+  width: 100%;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+main.page > fieldset legend + * {
+  clear: both;
+}
+
+main.page > fieldset label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+main.page > fieldset label:hover {
+  border-color: #a5b4fc;
+  background: var(--primary-soft);
+}
+
+main.page > fieldset label:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  font-weight: 600;
+}
+
+main.page > div:not(.table-scroll):not(.actions) > button {
+  margin-right: 8px;
+}
+
+main.page > div:not(.table-scroll):not(.actions):has(> button) button {
+  color: var(--text);
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+main.page > button {
+  margin-top: 12px;
+}
+
+/* Quiz lists: topic lists, scores and Quiz Management (cards) */
+.page section ul,
+.page > ul,
+.quiz-list {
+  margin-top: 16px !important;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  display: grid;
+  gap: 10px;
+}
+
+.page section ul > li,
+.page > ul > li,
+.quiz-list > li {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 14px 18px;
+}
+
+.page section ul > li:hover,
+.page > ul > li:hover {
+  border-color: #c7cdf9;
+}
+
+.quiz-list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.page section h2 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* Status and error messages */
+p[role='alert'] {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+p[role='status']:not(.visually-hidden) {
+  color: var(--success);
+  background: var(--success-soft);
+  border: 1px solid #abefc6;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* Tables: leaderboard (OQS-17), users and feedback. They scroll inside their box on narrow screens (NFR-004). */
 .table-scroll {
   overflow-x: auto;
 }
 
-.leaderboard {
+table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
   margin-top: 12px;
 }
 
-.leaderboard th,
-.leaderboard td {
-  padding: 8px;
-  border-bottom: 1px solid #e5e7eb;
-  text-align: left;
+table {
+  overflow-wrap: normal;
 }
 
-.leaderboard tr.is-me {
-  background: #eef2ff;
-  font-weight: bold;
+th,
+td {
+  white-space: nowrap;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th:last-child,
+td:last-child {
+  white-space: normal;
+  min-width: 200px;
+}
+
+.user-table td:last-child,
+.user-table th:last-child,
+.leaderboard td:last-child,
+.leaderboard th:last-child {
+  white-space: nowrap;
+  min-width: 0;
+}
+
+th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  background: #f8f9fc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #fafbff;
+}
+
+.leaderboard tr.is-me,
+.leaderboard tr.is-me:hover {
+  background: var(--primary-soft);
+  font-weight: 700;
+}
+
+.leaderboard tr.is-me td:first-child {
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.role-badge {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 .visually-hidden {
@@ -163,9 +574,107 @@ textarea {
   white-space: nowrap;
 }
 
-/* Help text under a form field, linked with aria-describedby (NFR-005). */
-.field-hint {
-  display: block;
-  color: #4b5563;
-  margin-top: 2px;
+/* Lead line under each page title (the timer on Take Quiz, the score on the result page) */
+.page > h1 + p {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.page > h1 + p strong {
+  color: var(--text);
+  font-size: 1.6rem;
+  vertical-align: -2px;
+}
+
+/* Single-link paragraphs (Start quiz, View leaderboard, Back to quizzes, Home page links) shown as buttons in a row */
+.page > p:has(> a:only-child) {
+  display: inline-block;
+  margin: 8px 8px 0 0;
+}
+
+.page > p > a:only-child {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 16px;
+  box-shadow: var(--shadow);
+}
+
+.page > p > a:only-child:hover {
+  border-color: #c9cfdc;
+  background: var(--bg);
+}
+
+.page > p > a[href$='/take'] {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.page > p > a[href$='/take']:hover {
+  color: #fff;
+  background: var(--primary-hover);
+}
+
+/* Quiz details: topic, duration and question count as a small card */
+.page dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 22px;
+  max-width: 480px;
+  margin: 0 0 16px;
+}
+
+.page dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.page dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* On tablets and phones let table cells wrap so tables fit the screen (NFR-004). */
+@media (max-width: 900px) {
+  th,
+  td,
+  th:last-child,
+  td:last-child,
+  .user-table td:last-child,
+  .user-table th:last-child,
+  .leaderboard td:last-child,
+  .leaderboard th:last-child {
+    white-space: normal;
+    min-width: 0;
+    padding: 10px 8px;
+  }
+
+  table {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding-top: 24px;
+  }
+
+  h1 {
+    font-size: 1.55rem;
+  }
+
+  form {
+    padding: 18px;
+  }
 }
